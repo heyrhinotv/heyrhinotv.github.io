@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rhino's Caffeine Clock</title>
+<meta name="description" content="Plug in your energy drink and your bedtime. See how much caffeine is still in you when you lie down.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Kalam:wght@700&display=swap">
+<style>
+/* Layout: phone-first single column (people arrive from a YouTube description). Result card → inputs → chart → rule → sources. */
+:root{
+  --bg:#F3F1EC; --surface:#FFFFFF; --fg:#0B0B0F; --muted:#4A4E5C; --line:#DEDBD3;
+  --cobalt:#1F4FD8; --series:#1F4FD8; --area:rgba(31,79,216,.12); --grid:#E7E4DC;
+  --yellow:#FFD60A; --ink:#0B0B0F; --navy:#0A1A5C; --chip:#EEF2FF; --chip-fg:#16328F;
+  --warn-bg:#FFF4CC; --warn-fg:#5A4700;
+  --f-display:'Poppins',system-ui,sans-serif; --f-body:'Inter',system-ui,sans-serif; --f-note:'Kalam','Comic Sans MS',cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1024; --surface:#141A36; --fg:#F3F1EC; --muted:#AEB4C6; --line:#2A3360;
+  --cobalt:#7FA0FF; --series:#5B82F5; --area:rgba(91,130,245,.16); --grid:#232B55;
+  --chip:#1E2A5E; --chip-fg:#C9D6FF; --warn-bg:#3A3210; --warn-fg:#FFE680; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1024; --surface:#141A36; --fg:#F3F1EC; --muted:#AEB4C6; --line:#2A3360;
+  --cobalt:#7FA0FF; --series:#5B82F5; --area:rgba(91,130,245,.16); --grid:#232B55;
+  --chip:#1E2A5E; --chip-fg:#C9D6FF; --warn-bg:#3A3210; --warn-fg:#FFE680; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2{font-family:var(--f-display);font-weight:800;letter-spacing:-.02em;line-height:1.12;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,7vw,40px)} h2{font-size:18px}
+p{margin:0}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:52px;height:52px;border-radius:50%;flex:none}
+.brand .t{display:flex;flex-direction:column;line-height:1.2}
+.brand b{font:800 15px var(--f-display)}
+.brand span{font-size:13px;color:var(--muted)}
+.hl{background:var(--yellow);color:#0B0B0F;padding:0 .16em;border-radius:.15em}
+.lede{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+/* result */
+.result{background:var(--navy);border:3px solid var(--ink);color:#fff}
+.result .k{font:700 12px var(--f-display);text-transform:uppercase;letter-spacing:.1em;color:var(--yellow)}
+.big{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big .n{font:800 clamp(56px,16vw,84px)/1 var(--f-display);color:var(--yellow);font-variant-numeric:tabular-nums}
+.big .u{font:700 18px var(--f-display)}
+.result .s{color:#DCE3FA;font-size:15px}
+.meter{height:16px;border-radius:999px;background:#1F2F7A;border:2px solid var(--ink);overflow:hidden}
+.meter i{display:block;height:100%;background:var(--yellow);border-right:2px solid var(--ink);transition:width .25s}
+@media (prefers-reduced-motion: reduce){.meter i{transition:none}}
+/* inputs */
+.drink{display:grid;grid-template-columns:1fr;gap:10px;padding:12px;border:1px solid var(--line);border-radius:12px}
+.drink-head{display:flex;justify-content:space-between;align-items:center}
+.drink-head b{font:700 14px var(--f-display)}
+.field{display:grid;grid-template-columns:110px 1fr 74px;gap:10px;align-items:center;font-size:14px}
+@media (max-width:420px){.field{grid-template-columns:1fr 70px}.field label{grid-column:1/-1}}
+.field label{font-weight:600}
+.field input[type=range]{width:100%;accent-color:var(--cobalt);min-width:0}
+.field output{font:700 14px var(--f-body);text-align:right;font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{font:600 12px var(--f-body);border:1px solid var(--line);background:var(--chip);color:var(--chip-fg);border-radius:999px;padding:5px 10px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--cobalt);color:#fff;border-color:var(--cobalt)}
+.btn{font:700 14px var(--f-display);border:2px solid var(--ink);background:var(--yellow);color:#0B0B0F;border-radius:999px;padding:8px 16px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);align-self:flex-start}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.link{font:600 13px var(--f-body);background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:4px}
+button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.small{font-size:13px;color:var(--muted)}
+/* chart */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;touch-action:pan-y}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:#fff;font:600 12px var(--f-body);padding:6px 9px;border-radius:8px;white-space:nowrap;transform:translate(-50%,-115%);opacity:0;transition:opacity .1s}
+.tip b{color:var(--yellow)}
+details summary{cursor:pointer;font:600 14px var(--f-body)}
+.tbl{overflow-x:auto;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:700;color:var(--muted)}
+/* rule */
+.rule{background:var(--warn-bg);color:var(--warn-fg);border-radius:12px;padding:12px 14px;font-size:14px;display:flex;flex-direction:column;gap:6px}
+.rule b{font-family:var(--f-display)}
+.note{font-family:var(--f-note);font-size:20px;color:var(--cobalt)}
+.sources ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.sources a{color:var(--cobalt)}
+footer{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px;text-align:center}
+</style>
+
+<div class="wrap">
+  <div class="brand"><img src="img/avatar.jpg" alt="HeyRhino" width="52" height="52"><div class="t"><b>HeyRhino</b><span>Inside the Rhino · What one energy drink does to your body</span></div></div>
+
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <h1>Rhino's <span class="hl">caffeine clock</span></h1>
+    <p class="lede">Plug in your can and your bedtime. See how much caffeine is still in you when you lie down.</p>
+  </header>
+
+  <section class="card result" aria-live="polite" aria-labelledby="res-k">
+    <span class="k" id="res-k">Still in you at bedtime</span>
+    <div class="big"><span class="n" id="left">50</span><span class="u">mg at <span id="bedlbl">1:00 am</span></span></div>
+    <div class="meter" aria-hidden="true"><i id="meter" style="width:25%"></i></div>
+    <p class="s" id="summary">That's 25% of the 200 mg you drank.</p>
+  </section>
+
+  <section class="card" aria-labelledby="in-h">
+    <h2 id="in-h">Your drinks</h2>
+    <div id="drinks"></div>
+    <button class="btn" id="add" type="button">+ add another drink</button>
+
+    <h2>Your night</h2>
+    <div class="field"><label for="bed">Bedtime</label><input id="bed" type="range" min="20" max="27" step="0.5" value="25"><output id="bed-o" for="bed">1:00 am</output></div>
+    <div class="field"><label for="hl">Your half-life</label><input id="hl" type="range" min="2" max="11" step="0.5" value="5"><output id="hl-o" for="hl">5 h</output></div>
+    <div class="chips" role="group" aria-label="Half-life presets">
+      <button type="button" data-hl="5" aria-pressed="true">typical adult · 5 h</button>
+      <button type="button" data-hl="3.5" aria-pressed="false">faster · 3.5 h</button>
+      <button type="button" data-hl="6" aria-pressed="false">slower · 6 h</button>
+    </div>
+    <p class="small">Half-life = how long your body takes to clear half the caffeine. For a lot of adults it's around 3–6 hours. Smokers clear it faster (about 3.5 h in one study). Estrogen birth-control pills slow it a lot, and in the last weeks of pregnancy it can stretch to about 10.5 hours.</p>
+  </section>
+
+  <section class="card" aria-labelledby="ch-h">
+    <h2 id="ch-h">Caffeine in you, hour by hour</h2>
+    <div class="chart" id="chart"><svg id="svg" viewBox="0 0 640 300" role="img" aria-label="Line chart of caffeine in your body over time"></svg><div class="tip" id="tip"></div></div>
+    <p class="small">Drag or hover over the chart to read any time. Simplified on purpose: it treats each drink as absorbed right away (in reality about 99% is in your blood within ~45 minutes).</p>
+    <details><summary>Show the numbers</summary><div class="tbl"><table id="tbl"><thead><tr><th scope="col">Time</th><th scope="col">Caffeine in you</th></tr></thead><tbody></tbody></table></div></details>
+  </section>
+
+  <section class="rule" id="rule" aria-live="polite"></section>
+
+  <section class="card sources" aria-labelledby="src-h">
+    <h2 id="src-h">Where these numbers come from</h2>
+    <ol>
+      <li>Typical can ≈ 200 mg, about two cups of brewed coffee: <a href="https://nutritionsource.hsph.harvard.edu/energy-drinks/">Harvard T.H. Chan, The Nutrition Source</a></li>
+      <li>16 oz energy drinks range 54–328 mg; ~400 mg/day for most healthy adults; experts advise against energy drinks for kids and teens: <a href="https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much">FDA, “Spilling the Beans”</a></li>
+      <li>Half-life ~3–6 h; smokers ~3.5 h; slower on estrogen pills; up to ~10.5 h late in pregnancy; ~99% absorbed within ~45 min: <a href="https://link.springer.com/article/10.1186/s41065-026-00648-z">Liu &amp; Xu, Hereditas (2026)</a></li>
+      <li>400 mg six hours before bed cut sleep by more than an hour; avoid caffeine after 5 p.m.: <a href="https://aasm.org/late-afternoon-and-early-evening-caffeine-can-disrupt-sleep-at-night/">Drake et al., J Clin Sleep Med 2013 (AASM)</a></li>
+    </ol>
+    <p class="small">Everyone's body is different. This is education, not medical advice. If you're pregnant, have a heart condition, or take medication, ask your doctor about caffeine.</p>
+  </section>
+
+  <footer>
+    <span class="note">it's not energy. it's a loan.</span>
+    <span>Made by HeyRhino · @heyrhinotv on YouTube, Instagram and TikTok · welcome to the crash</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const PRESETS=[[54,'low end · 54'],[200,'typical can · 200'],[328,'high end · 328']];
+  let drinks=[{mg:200,t:15}];
+  let S={bed:25,hl:5};
+  try{const s=JSON.parse(localStorage.getItem('rhino-clock')||'null'); if(s&&Array.isArray(s.drinks)&&s.drinks.length){drinks=s.drinks.slice(0,3);S.bed=+s.bed||25;S.hl=+s.hl||5;}}catch(e){}
+  const fmt=h=>{h=((h%24)+24)%24;let hr=Math.floor(h),m=Math.round((h-hr)*60);if(m===60){hr=(hr+1)%24;m=0;}const ap=hr<12?'am':'pm';const h12=hr%12===0?12:hr%12;return h12+':'+String(m).padStart(2,'0')+' '+ap;};
+  const fmtShort=h=>{h=((h%24)+24)%24;const hr=Math.round(h)%24;const ap=hr<12?'am':'pm';const h12=hr%12===0?12:hr%12;return h12+ap;};
+  const level=t=>drinks.reduce((s,d)=>t>=d.t?s+d.mg*Math.pow(.5,(t-d.t)/S.hl):s,0);
+  function save(){try{localStorage.setItem('rhino-clock',JSON.stringify({drinks,bed:S.bed,hl:S.hl}));}catch(e){}}
+
+  function renderDrinks(){
+    const box=$('drinks'); box.innerHTML='';
+    drinks.forEach((d,i)=>{
+      const el=document.createElement('div'); el.className='drink';
+      el.innerHTML=`<div class="drink-head"><b>Drink ${i+1}</b>${drinks.length>1?`<button class="link" type="button" data-rm="${i}">remove</button>`:''}</div>
+        <div class="field"><label for="mg${i}">Caffeine</label><input id="mg${i}" type="range" min="25" max="400" step="1" value="${d.mg}"><output id="mg${i}-o" for="mg${i}">${d.mg} mg</output></div>
+        <div class="chips" role="group" aria-label="Caffeine presets for drink ${i+1}">${PRESETS.map(([v,l])=>`<button type="button" data-i="${i}" data-mg="${v}" aria-pressed="${d.mg===v}">${l} mg</button>`).join('')}</div>
+        <div class="field"><label for="t${i}">Drank it at</label><input id="t${i}" type="range" min="5" max="26" step="0.5" value="${d.t}"><output id="t${i}-o" for="t${i}">${fmt(d.t)}</output></div>`;
+      box.appendChild(el);
+      el.querySelector(`#mg${i}`).addEventListener('input',e=>{d.mg=+e.target.value;$(`mg${i}-o`).value=d.mg+' mg';el.querySelectorAll('[data-mg]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.mg===d.mg));update();});
+      el.querySelector(`#t${i}`).addEventListener('input',e=>{d.t=+e.target.value;$(`t${i}-o`).value=fmt(d.t);update();});
+      el.querySelectorAll('[data-mg]').forEach(b=>b.addEventListener('click',()=>{d.mg=+b.dataset.mg;renderDrinks();update();}));
+      const rm=el.querySelector('[data-rm]'); if(rm) rm.addEventListener('click',()=>{drinks.splice(i,1);renderDrinks();update();});
+    });
+    $('add').disabled=drinks.length>=3;
+  }
+  $('add').addEventListener('click',()=>{if(drinks.length<3){const last=drinks[drinks.length-1];drinks.push({mg:200,t:Math.min(last.t+3,22)});renderDrinks();update();}});
+  $('bed').value=S.bed; $('hl').value=S.hl;
+  $('bed').addEventListener('input',e=>{S.bed=+e.target.value;update();});
+  $('hl').addEventListener('input',e=>{S.hl=+e.target.value;syncHl();update();});
+  document.querySelectorAll('[data-hl]').forEach(b=>b.addEventListener('click',()=>{S.hl=+b.dataset.hl;$('hl').value=S.hl;syncHl();update();}));
+  function syncHl(){document.querySelectorAll('[data-hl]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.hl===S.hl));}
+
+  // chart geometry
+  let W=640,H=300; const M={l:42,r:14,t:22,b:30};
+  let view={x0:0,x1:1,ymax:1};
+  const X=t=>M.l+(t-view.x0)/(view.x1-view.x0)*(W-M.l-M.r);
+  const Y=v=>H-M.b-(v/view.ymax)*(H-M.t-M.b);
+  const niceMax=v=>{const steps=[50,100,150,200,250,300,400,500,600,800,1000,1200];return steps.find(s=>s>=v*1.08)||Math.ceil(v/200)*200;};
+
+  function drawChart(){
+    // draw at the real pixel width so labels stay readable on phones
+    W=Math.max(300,Math.round($('chart').clientWidth||640)); H=W<520?250:300;
+    $('svg').setAttribute('viewBox',`0 0 ${W} ${H}`);
+    const t0=Math.min(...drinks.map(d=>d.t))-0.5, t1=S.bed+8;
+    let peak=0; for(let t=t0;t<=t1;t+=0.05) peak=Math.max(peak,level(t));
+    view={x0:t0,x1:t1,ymax:niceMax(Math.max(peak,50))};
+    const step=view.ymax<=200?50:view.ymax<=400?100:200;
+    let g='';
+    for(let v=0;v<=view.ymax+0.1;v+=step){const y=Y(v);g+=`<line x1="${M.l}" x2="${W-M.r}" y1="${y}" y2="${y}" stroke="var(--grid)" stroke-width="1"/><text x="${M.l-8}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`;}
+    g+=`<text x="${M.l-8}" y="${M.t-8}" text-anchor="end" font-size="11" fill="var(--muted)">mg</text>`;
+    const every=W<420?4:3, first=Math.ceil(t0/every)*every;
+    for(let t=first;t<=t1;t+=every){const x=X(t);g+=`<text x="${x}" y="${H-M.b+20}" text-anchor="middle" font-size="11" fill="var(--muted)">${fmtShort(t)}</text><line x1="${x}" x2="${x}" y1="${H-M.b}" y2="${H-M.b+5}" stroke="var(--muted)" stroke-width="1"/>`;}
+    // curve
+    let pts=[]; for(let t=t0;t<=t1+1e-9;t+=0.05) pts.push([X(t),Y(level(t))]);
+    const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L');
+    const area=d+`L${X(t1).toFixed(1)},${Y(0)}L${X(t0).toFixed(1)},${Y(0)}Z`;
+    // bedtime band + marker
+    const bx=X(S.bed), by=Y(level(S.bed));
+    g+=`<rect x="${bx}" y="${M.t}" width="${W-M.r-bx}" height="${H-M.t-M.b}" fill="var(--grid)" opacity=".55"/>`;
+    g+=`<path d="${area}" fill="var(--area)"/><path d="${d}" fill="none" stroke="var(--series)" stroke-width="2.5" stroke-linejoin="round"/>`;
+    g+=`<line x1="${bx}" x2="${bx}" y1="${M.t}" y2="${H-M.b}" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+    g+=`<text x="${bx+6}" y="${M.t+12}" font-size="12" font-weight="700" fill="var(--fg)">bedtime</text>`;
+    g+=`<circle cx="${bx}" cy="${by}" r="7" fill="var(--yellow)" stroke="var(--surface)" stroke-width="2"/><circle cx="${bx}" cy="${by}" r="7" fill="none" stroke="var(--ink)" stroke-width="1.5"/>`;
+    g+=`<text x="${bx+11}" y="${Math.max(by-10,M.t+28)}" font-size="13" font-weight="800" fill="var(--fg)">${Math.round(level(S.bed))} mg</text>`;
+    // drink markers
+    drinks.forEach((dr,i)=>{const x=X(dr.t),y=Y(level(dr.t));g+=`<circle cx="${x}" cy="${y}" r="5" fill="var(--series)" stroke="var(--surface)" stroke-width="2"/><text x="${x}" y="${y-10}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--muted)">drink ${i+1}</text>`;});
+    // hover layer
+    g+=`<line id="hx" x1="0" x2="0" y1="${M.t}" y2="${H-M.b}" stroke="var(--muted)" stroke-width="1" opacity="0"/><circle id="hd" r="5" fill="var(--series)" stroke="var(--surface)" stroke-width="2" opacity="0"/><rect id="hit" x="${M.l}" y="${M.t}" width="${W-M.l-M.r}" height="${H-M.t-M.b}" fill="transparent"/>`;
+    // theme tokens must live in style, not presentation attributes
+    g=g.replace(/<(\w+)([^>]*?)(\/?)>/g,(m,tag,attrs,sc)=>{const st=[];attrs=attrs.replace(/\s(fill|stroke)="(var\([^)]+\))"/g,(mm,k,v)=>{st.push(k+':'+v);return '';});return '<'+tag+attrs+(st.length?' style="'+st.join(';')+'"':'')+sc+'>';});
+    $('svg').innerHTML=g;
+    const svg=$('svg'), tip=$('tip'), hit=$('hit');
+    const move=ev=>{
+      const r=svg.getBoundingClientRect(); const cx=(ev.touches?ev.touches[0].clientX:ev.clientX);
+      const px=(cx-r.left)/r.width*W; const t=Math.min(t1,Math.max(t0,view.x0+(px-M.l)/(W-M.l-M.r)*(view.x1-view.x0)));
+      const tt=Math.round(t*4)/4, v=level(tt), x=X(tt), y=Y(v);
+      $('hx').setAttribute('x1',x);$('hx').setAttribute('x2',x);$('hx').setAttribute('opacity',1);
+      $('hd').setAttribute('cx',x);$('hd').setAttribute('cy',y);$('hd').setAttribute('opacity',1);
+      tip.innerHTML=`${fmt(tt)} · <b>${Math.round(v)} mg</b>`; tip.style.left=(x/W*r.width)+'px'; tip.style.top=(y/H*r.height)+'px'; tip.style.opacity=1;
+    };
+    const out=()=>{$('hx').setAttribute('opacity',0);$('hd').setAttribute('opacity',0);tip.style.opacity=0;};
+    hit.addEventListener('mousemove',move); hit.addEventListener('touchstart',move,{passive:true}); hit.addEventListener('touchmove',move,{passive:true});
+    hit.addEventListener('mouseleave',out); hit.addEventListener('touchend',out);
+    // table
+    const tb=$('tbl').querySelector('tbody'); tb.innerHTML='';
+    for(let t=Math.ceil(t0);t<=t1;t+=1){const tr=document.createElement('tr');tr.innerHTML=`<td>${fmt(t)}${Math.abs(t-S.bed)<.01?' (bedtime)':''}</td><td>${Math.round(level(t))} mg</td>`;tb.appendChild(tr);}
+  }
+
+  function update(){
+    $('bed-o').value=fmt(S.bed); $('hl-o').value=S.hl+' h';
+    const total=drinks.reduce((s,d)=>s+d.mg,0);
+    const before=drinks.filter(d=>d.t<=S.bed), drank=before.reduce((s,d)=>s+d.mg,0);
+    const left=level(S.bed);
+    $('left').textContent=Math.round(left); $('bedlbl').textContent=fmt(S.bed);
+    const frac=drank?left/drank:0; $('meter').style.width=Math.min(100,frac*100).toFixed(1)+'%';
+    const cans=left/200;
+    const single200=before.length===1&&drank===200;
+    let s=drank?`That's ${Math.round(frac*100)}% of the ${drank} mg you drank, still working when you lie down`:'No drinks before bedtime.';
+    if(drank&&!single200&&cans>=0.15) s+=`: about ${cans>=0.95?Math.round(cans*10)/10+' typical cans':Math.round(cans*100)+'% of a typical can'}.`;
+    else if(drank) s+=frac<0.05?'. Mostly cleared.':'.';
+    if(drinks.length>before.length) s+=' (A drink after bedtime isn’t counted.)';
+    $('summary').textContent=s;
+    // Rhino's rule
+    const last=Math.max(...before.map(d=>d.t), -1);
+    const notes=[];
+    if(last>=17) notes.push('<b>Rhino’s rule:</b> the sleep researchers say caffeine should generally be avoided after 5 p.m.');
+    if(last>=0 && S.bed-last<6) notes.push('<b>Heads up:</b> in a sleep-lab study, 400 mg taken six hours before bed still cost people more than an hour of sleep, and they didn’t notice. Six hours is the bare minimum, not the goal.');
+    if(total>400) notes.push('<b>That’s a lot:</b> the FDA says about 400 mg a day is the most most healthy adults can usually have without problems.');
+    if(!notes.length) notes.push(`<b>Your timing follows Rhino’s rule:</b> last caffeine before 5 p.m. and at least six hours before bed. Even so, about ${Math.round(left)} mg is still in you at lights-out, and everyone’s clock runs at a different speed.`);
+    $('rule').innerHTML=notes.map(n=>'<span>'+n+'</span>').join('');
+    drawChart(); save();
+  }
+  let rz; window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(drawChart,120);});
+  syncHl(); renderDrinks(); update();
+})();
+</script>
