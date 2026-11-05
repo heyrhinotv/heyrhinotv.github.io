@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rhino's notes: one energy drink</title>
+<meta name="description" content="The one-page cheat sheet for Inside the Rhino: what one energy drink does to your stomach, brain, heart and sleep, and who profits. Every number sourced.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;600;700&family=Kalam:wght@700&family=Instrument+Serif:ital@1&display=swap">
+<style>
+/* Layout: on screen, phone-first single column (people arrive from a YouTube description): header → big idea → four stops → receipt / rule / label → clock → sources.
+   In print, the same content packs onto one US Letter page: 2×2 stops, a row of three boxes, sources in the footer. */
+:root{
+  --cobalt:#1F4FD8; --yellow:#FFD60A; --navy:#0A1A5C; --ink:#0B0B0F; --paper:#F3F1EC; --white:#FFFFFF;
+  --coral:#FF6B5B; --money:#22C55E; --muted:#4A4E5C; --line:#DEDBD3; --card:#FFFFFF;
+  --f-head:'Poppins',system-ui,sans-serif; --f-body:'Inter',system-ui,sans-serif; --f-note:'Kalam','Comic Sans MS',cursive; --f-label:'Instrument Serif',Georgia,serif;
+}
+@media screen and (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0C1024; --card:#141A36; --ink:#F3F1EC; --muted:#AEB4C6; --line:#2A3360; color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0C1024; --card:#141A36; --ink:#F3F1EC; --muted:#AEB4C6; --line:#2A3360; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--f-body);
+  padding:20px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px))}
+.sheet{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-head);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0;text-wrap:balance}
+p{margin:0}
+/* header: the navy night sky with the yellow ring */
+.top{position:relative;overflow:hidden;background:var(--navy);color:#fff;border:3px solid #0B0B0F;border-radius:18px;padding:18px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.top::after{content:"";position:absolute;right:-52px;top:-52px;width:112px;height:112px;border-radius:50%;
+  border:14px solid var(--yellow);box-shadow:0 0 0 3px #0B0B0F,inset 0 0 0 3px #0B0B0F,0 0 40px rgba(255,214,10,.45);opacity:.95}
+.top img{width:58px;height:58px;border-radius:50%;display:block;position:relative;z-index:1}
+.top .label{font:italic 18px/1.15 var(--f-label);color:var(--yellow);padding-right:52px}
+.top h1{font-size:clamp(30px,8vw,44px);margin-top:4px;position:relative;z-index:1}
+.top .sub{font-size:14px;color:#DCE3FA;margin-top:6px;position:relative;z-index:1}
+.top .label .h{font:700 12px var(--f-head);color:#fff;margin-left:6px;white-space:nowrap}
+.top > div{position:relative;z-index:1}
+/* pills: yellow = emphasis, green = money, coral = body risk (each colour one job) */
+.pill{background:var(--yellow);color:#0B0B0F;font-weight:700;padding:0 .2em;border-radius:.2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.money{background:var(--money);color:#0B0B0F;font-weight:700;padding:0 .2em;border-radius:.2em}
+.risk{background:var(--coral);color:#0B0B0F;font-weight:700;padding:0 .2em;border-radius:.2em}
+.idea{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.idea h2{font-size:clamp(22px,5.6vw,28px)}
+.idea h2 .pill{border:3px solid #0B0B0F;padding:0 .14em .04em;border-radius:10px}
+.idea p{color:var(--muted);font-size:15px}
+/* the trip: four stops */
+.trip{display:grid;grid-template-columns:1fr;gap:14px}
+.stop{background:var(--card);border:2px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.stop header{background:var(--cobalt);color:#fff;display:flex;align-items:center;gap:10px;padding:8px 12px}
+.ring{flex:none;width:30px;height:30px;border-radius:50%;border:5px solid var(--yellow);box-shadow:0 0 0 2px #0B0B0F,inset 0 0 0 2px #0B0B0F;
+  display:grid;place-items:center;font:800 13px/1 var(--f-head);color:#fff}
+.stop header b{font:800 15px/1.1 var(--f-head);text-transform:lowercase}
+.stop header .when{margin-left:auto;font:700 12px/1 var(--f-head);background:var(--yellow);color:#0B0B0F;border:2px solid #0B0B0F;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.body{padding:12px 14px 14px;display:grid;grid-template-columns:1fr 72px;gap:10px;align-items:start}
+.body h3{font-size:19px;margin-bottom:4px;text-transform:lowercase}
+.body p{font-size:14.5px}
+.body p+p{margin-top:6px}
+.art{display:flex;flex-direction:column;align-items:center;gap:4px}
+.art img{width:100%;height:auto;display:block}
+.art.two img{width:78%}
+.myth{grid-column:1/-1;border-top:2px dashed var(--line);padding-top:8px}
+.myth h4{margin:0 0 2px;font:800 15px/1.2 var(--f-head);text-transform:lowercase}
+.math{font:800 15px/1.4 var(--f-head);color:var(--cobalt);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin:4px 0}
+.math span{background:var(--card);border:2px solid var(--cobalt);border-radius:8px;padding:1px 7px;white-space:nowrap}
+.math .last{background:var(--yellow);border-color:#0B0B0F;color:#0B0B0F}
+.note{font:700 18px/1.15 var(--f-note);color:var(--cobalt);transform:rotate(-2deg);display:inline-block}
+/* boxes */
+.boxes{display:grid;grid-template-columns:1fr;gap:14px}
+.box{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:12px 14px;font-size:14.5px;display:flex;flex-direction:column;gap:6px}
+.box h3{font-size:18px;text-transform:lowercase}
+.box.rule{background:var(--yellow);color:#0B0B0F;border-color:#0B0B0F}
+.receipt{font:600 13.5px/1.5 ui-monospace,'Cascadia Mono',Consolas,monospace;background:#FFFFFF;color:#0B0B0F;border:2px solid #0B0B0F;border-radius:6px;padding:10px 12px;
+  -webkit-mask:radial-gradient(circle 6px at 50% 0,transparent 98%,#000) top/14px 100% repeat-x}
+.receipt h3{font:800 15px var(--f-head);text-align:center;margin-bottom:4px;text-transform:lowercase}
+.receipt .ln{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed #9AA0AE;padding:2px 0}
+.receipt .ln:last-child{border:0;font-weight:800}
+.receipt .ln span:first-child{white-space:nowrap}
+.receipt .ln span:last-child{text-align:right}
+/* clock + footer */
+.clock{background:var(--navy);color:#fff;border:3px solid #0B0B0F;border-radius:16px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.clock b{font:800 18px var(--f-head)}
+.clock p{color:#DCE3FA;font-size:14px}
+.btn{display:inline-block;font:700 14px var(--f-head);border:2px solid #0B0B0F;background:var(--yellow);color:#0B0B0F;border-radius:999px;padding:8px 16px;box-shadow:3px 4px 0 #0B0B0F;text-decoration:none;white-space:nowrap}
+.btn:focus-visible,a:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.dl{display:flex;justify-content:center}
+.foot{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.foot b{color:var(--ink)}
+.foot ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+.foot a{color:var(--cobalt)}
+.sig{font:700 15px var(--f-note);color:var(--ink);text-align:center}
+@media (min-width:640px){
+  .top img{width:74px;height:74px}
+  .top::after{width:150px;height:150px;right:-46px;top:-46px;border-width:18px}
+  .top > div{padding-right:112px}
+  .top .label{padding-right:0}
+  .body{grid-template-columns:1fr 92px}
+  .trip{grid-template-columns:1fr 1fr}
+  .boxes{grid-template-columns:1.05fr 1fr 1fr}
+}
+
+/* ---------- print: one US Letter page ---------- */
+@page{size:Letter;margin:0}
+@media print{
+  :root{--paper:#F3F1EC;--card:#FFFFFF;--ink:#0B0B0F;--muted:#3B3F4C;--line:#D3CFC5}
+  html,body{width:8.5in;height:11in}
+  body{padding:.32in .38in .26in;font-size:10.4px;line-height:1.36;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{max-width:none;gap:7px;height:100%}
+  .top{padding:9px 12px 12px;border-radius:12px;gap:10px;align-items:start}
+  .top > div{padding-right:96px}
+  .top img{width:54px;height:54px}
+  .top::after{width:116px;height:116px;right:-34px;top:-40px;border-width:14px}
+  .top .label{font-size:14px} .top h1{font-size:30px} .top .sub{font-size:11px;margin-top:3px}
+  .top .label .h{font-size:10.5px}
+  .idea{padding:7px 12px;border-radius:12px;border-width:2.5px;flex-direction:row;align-items:baseline;gap:12px}
+  .idea h2{font-size:19px;white-space:nowrap} .idea p{font-size:10.4px}
+  .trip{grid-template-columns:1fr 1fr;gap:7px}
+  .stop{border-radius:12px;break-inside:avoid}
+  .stop header{padding:4px 9px;gap:7px}
+  .ring{width:21px;height:21px;border-width:4px;font-size:10px}
+  .stop header b{font-size:12px} .stop header .when{font-size:9.5px;padding:2px 7px}
+  .body{padding:6px 9px 7px;grid-template-columns:1fr 62px;gap:7px}
+  .body h3{font-size:13.5px;margin-bottom:2px}
+  .body p{font-size:10.2px} .body p+p{margin-top:3px}
+  .myth{padding-top:4px} .myth h4{font-size:11px}
+  .math{font-size:10.4px;margin:2px 0;gap:2px 5px;flex-wrap:nowrap} .math span{padding:0 4px;border-width:1.5px}
+  .note{font-size:13px}
+  .boxes{grid-template-columns:1.05fr 1fr 1fr;gap:7px}
+  .box{border-radius:12px;border-width:2.5px;padding:7px 10px;font-size:10.2px;gap:3px}
+  .box h3{font-size:13px}
+  .receipt{font-size:9.6px;padding:6px 8px;line-height:1.38}
+  .receipt h3{font-size:11px;margin-bottom:2px}
+  .clock{padding:6px 12px;border-radius:12px;border-width:2.5px;gap:4px 12px}
+  .clock b{font-size:13px} .clock p{font-size:10px}
+  .btn{font-size:11px;padding:4px 11px;box-shadow:2px 3px 0 #0B0B0F}
+  .dl{display:none}
+  .foot{font-size:7.4px;line-height:1.3;gap:2px;margin-top:auto}
+  .foot ol{display:block;columns:2;column-gap:14px;padding-left:12px}
+  .foot ol li{break-inside:avoid}
+  .foot a{color:inherit;text-decoration:none}
+  .sig{font-size:11px}
+}
+</style>
+
+<main class="sheet">
+  <header class="top">
+    <img src="img/avatar.jpg" alt="Rhino, the HeyRhino host, in his glasses and black hoodie" width="74" height="74">
+    <div>
+      <div class="label">Inside the Rhino · Rhino's notes <span class="h">@heyrhinotv</span></div>
+      <h1>one energy drink.</h1>
+      <p class="sub">What one can does to your stomach, brain, heart and sleep, stop by stop. And who profits.</p>
+    </div>
+  </header>
+
+  <section class="idea" aria-label="The big idea">
+    <h2>it's not energy. it's a <span class="pill">loan.</span></h2>
+    <p>Caffeine doesn't make energy. It borrows it from later, and you pay it back with interest. Call it the energy loan.</p>
+  </section>
+
+  <section class="trip" aria-label="The four stops">
+    <article class="stop">
+      <header><span class="ring">1</span><b>stomach</b><span class="when">0–10 min</span></header>
+      <div class="body">
+        <div>
+          <h3>a whole day of sugar.</h3>
+          <p>A typical can has about <span class="pill">40 g of sugar ≈ 10 teaspoons</span>. The American Heart Association's cap on added sugar is about <b>9 tsp a day for men and 6 for women</b>. One can beats it before dinner.</p>
+          <p>Caffeine moves fast: some is absorbed right in your stomach, the rest in your small intestine, and about <b>99% is in your blood within ~45 minutes</b>. Then it walks straight through the wall that guards your brain.</p>
+          <p><span class="note">1 can &gt; a whole day of sugar.</span></p>
+        </div>
+        <div class="art"><img src="img/stomach.png" alt="Stomach crew worker with a wrench" width="92" height="92"></div>
+      </div>
+    </article>
+
+    <article class="stop">
+      <header><span class="ring">2</span><b>brain + heart</b><span class="when">15–60 min</span></header>
+      <div class="body">
+        <div>
+          <h3>it hides tired. it doesn't add energy.</h3>
+          <p>All day your brain piles up <b>adenosine</b>, a mail carrier with one message: "you're tired." Caffeine sits in its docks <span class="pill">without delivering the message</span>, so the messages pile up in the lobby. Peak caffeine: about <b>1 hour</b> in.</p>
+          <p>Your heart: in a small Mayo Clinic study (25 young adults, one 16-oz can), <span class="risk">blood pressure rose ~6%</span> vs ~1% with a placebo, and the stress hormone norepinephrine rose more than twice as much.</p>
+        </div>
+        <div class="art two"><img src="img/mail.png" alt="Adenosine, a tired envelope mail carrier" width="70" height="92"><img src="img/caffeine.png" alt="Caffeine, a yellow crate in sunglasses" width="70" height="74"></div>
+        <div class="myth">
+          <h4>still hour one: the sugar rush is a myth.</h4>
+          <p>31 studies, almost 1,300 adults: sugar didn't lift mood, and within an hour people felt <b>more tired and less alert</b>. The "energy blend" (taurine, ginseng, guarana) isn't backed by solid controlled trials, and extra B vitamins mostly leave in your pee. B2 is why it looks so yellow.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="stop">
+      <header><span class="ring">3</span><b>bedtime</b><span class="when">5 hrs</span></header>
+      <div class="body">
+        <div>
+          <h3>half is still in you.</h3>
+          <p>Your liver clears it (one enzyme does over 90% of the first step). Caffeine's half-life is about <b>3–6 hours</b> for many adults. Call it 5. With a 200 mg can:</p>
+          <div class="math"><span>3 pm · 200 mg</span>→<span>8 pm · ~100</span>→<span class="last">1 am · ~50</span></div>
+          <p>In a sleep-lab study, <span class="risk">400 mg six hours before bed cut sleep by more than an hour</span>, and people didn't notice. When it clears, the stored-up tired walks in at once: the crash, with interest.</p>
+          <p><b>Your clock isn't my clock:</b> smokers clear it faster (~6 h → 3.5 h), estrogen birth-control pills slow it by more than half, and late in pregnancy it can stretch to ~10.5 h.</p>
+        </div>
+        <div class="art"><img src="img/liver.png" alt="Liver crew worker in a hard hat" width="84" height="92"></div>
+      </div>
+    </article>
+
+    <article class="stop">
+      <header><span class="ring">4</span><b>the bill</b><span class="when">who profits</span></header>
+      <div class="body">
+        <div>
+          <h3>the part that wakes you up costs less than a penny.</h3>
+          <p>Bulk caffeine trades for about <b>$14 a kilogram</b>, so 200 mg costs about <span class="money">$0.003</span>. You paid a few bucks.</p>
+          <p>The biggest energy drink company on the U.S. stock market sold about <b>$8.3 billion</b> of drinks last year, kept about <span class="money">56¢ of every $1</span> after making and shipping them, then spent about <b>$2.2 billion</b> running the company: marketing, sponsorships, athletes, people.</p>
+          <p>Not a scam, a business. You're paying for the feeling, not the caffeine. <span class="note">know what you're paying for.</span></p>
+        </div>
+        <div class="art"><img src="img/cart.png" alt="Crew worker pushing a cart of gold coins" width="92" height="78"></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="boxes">
+    <div class="receipt" aria-label="Your receipt for one can">
+      <h3>your receipt for one can.</h3>
+      <div class="ln"><span>10 minutes</span><span>a whole day of sugar</span></div>
+      <div class="ln"><span>1 hour</span><span>peak caffeine, tired messages in the lobby, heart working harder</span></div>
+      <div class="ln"><span>5 hours</span><span>half still in you</span></div>
+      <div class="ln"><span>the caffeine</span><span>&lt; ⅓ of a penny</span></div>
+      <div class="ln"><span>interest due</span><span>tonight</span></div>
+    </div>
+    <div class="box rule">
+      <h3>rhino's rule.</h3>
+      <p>No caffeine within <b>6 hours of bed</b>, and treat that as the bare minimum. The researchers behind the sleep study said caffeine should generally be avoided <b>after 5 p.m.</b></p>
+      <p>Need energy later than that? You're already in debt. Only sleep pays it off.</p>
+      <p><span class="note" style="color:#0A1A5C">the only energy that doesn't come with interest.</span></p>
+    </div>
+    <div class="box">
+      <h3>read the label.</h3>
+      <p>16-oz energy drinks range from <b>54 to 328 mg</b> of caffeine (FDA). About <b>400 mg a day</b> is usually fine for healthy adults; <span class="risk">seizures</span> can show up with ~1,200 mg taken fast.</p>
+      <p>ER visits involving energy drinks doubled to almost 21,000 a year (2007–2011); about 4 in 10 also involved other drugs or alcohol. Experts advise against energy drinks for kids and teens.</p>
+    </div>
+  </section>
+
+  <section class="clock" aria-label="Caffeine clock">
+    <div><b>what's still in you tonight?</b><p>Plug in your can and your bedtime: Rhino's caffeine clock does the math for your body.</p></div>
+    <a class="btn" href="https://heyrhinotv.github.io/clock/">heyrhinotv.github.io/clock</a>
+  </section>
+
+  <div class="dl"><a class="btn" href="rhinos-notes-energy-drink.pdf" download>Download the one-page PDF</a></div>
+
+  <footer class="foot">
+    <p><b>Education and entertainment, not medical advice.</b> Heart condition, pregnant, or on medication? Ask your doctor about caffeine. Half-life math is illustrative and varies by person.</p>
+    <ol>
+      <li>Harvard T.H. Chan, The Nutrition Source: <a href="https://nutritionsource.hsph.harvard.edu/energy-drinks/">Energy Drinks</a></li>
+      <li>American Heart Association: <a href="https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/sugar/added-sugars">Added Sugars</a></li>
+      <li>Liu &amp; Xu, Hereditas 2026: <a href="https://link.springer.com/article/10.1186/s41065-026-00648-z">caffeine absorption, half-life, smokers, pills, pregnancy</a></li>
+      <li>Arnaud, <a href="https://www.researchgate.net/publication/46394173_Pharmacokinetics_and_Metabolism_of_Natural_Methylxanthines_in_Animal_and_Man">Pharmacokinetics of methylxanthines</a> (stomach vs intestine)</li>
+      <li>Porkka-Heiskanen et al., <a href="https://www.science.org/doi/10.1126/science.276.5316.1265">Science 1997</a> (adenosine builds while awake)</li>
+      <li>Svatikova et al., <a href="https://doi.org/10.1001/jama.2015.13744">JAMA 2015</a> (Mayo Clinic, blood pressure)</li>
+      <li>Shah et al., <a href="https://doi.org/10.1161/JAHA.118.011318">J Am Heart Assoc 2019</a> (32 oz, heart rhythm)</li>
+      <li>Cleveland Clinic: <a href="https://my.clevelandclinic.org/health/articles/22610-norepinephrine-noradrenaline">Norepinephrine</a></li>
+      <li>Mantantzis et al. 2019, <a href="https://pubmed.ncbi.nlm.nih.gov/30951762/">Neurosci Biobehav Rev</a> (sugar and mood)</li>
+      <li>NIH Office of Dietary Supplements: <a href="https://ods.od.nih.gov/factsheets/Riboflavin-HealthProfessional/">Riboflavin</a></li>
+      <li>Drake et al., J Clin Sleep Med 2013 (<a href="https://aasm.org/late-afternoon-and-early-evening-caffeine-can-disrupt-sleep-at-night/">AASM</a>, <a href="https://sciencedaily.com/releases/2013/11/131114155838.htm">ScienceDaily</a>)</li>
+      <li>FDA: <a href="https://www.fda.gov/consumers/consumer-updates/spilling-beans-how-much-caffeine-too-much">Spilling the Beans</a></li>
+      <li>SAMHSA: <a href="https://www.samhsa.gov/data/sites/default/files/DAWN126/DAWN126/sr126-energy-drinks-use.htm">DAWN report on energy drinks</a></li>
+      <li>Pharmaoffer: <a href="https://pharmaoffer.com/api-excipient-supplier/transactions/caffeine-anhydrous">bulk caffeine prices</a> (12 months to Aug 2026)</li>
+      <li>Company full-year 2025 results, <a href="https://www.sec.gov/Archives/edgar/data/865752/000110465926020525/tm267393d1_ex99-1.htm">SEC filing</a> (Feb 2026)</li>
+    </ol>
+    <p class="sig">© 2026 HeyRhino · welcome to the crash 🦏</p>
+  </footer>
+</main>
+</html>
