@@ -1,5 +1,275 @@
 <!doctype html>
+<html lang="en">
 <meta charset="utf-8">
-<meta http-equiv="refresh" content="0; url=clock/">
-<title>HeyRhino</title>
-<a href="clock/">Rhino's Caffeine Clock</a>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rhino's Lab</title>
+<meta name="description" content="Your body is a city. HeyRhino shrinks down and gives the tour. Every trip leaves a free tool and a one-page cheat sheet here. First district open: the energy drink.">
+<meta name="theme-color" content="#0A1A5C">
+<link rel="icon" href="clock/img/avatar.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;600;700&family=Kalam:wght@700&family=Instrument+Serif:ital@1&display=swap">
+<style>
+/* Rhino's Lab: the public hub. Phone-first single column (people arrive from a YouTube description or a bio link):
+   header → the Body City map (tap a district) → one card per district → footer.
+   District 1 is open (clock + notes). Districts 2–4 are "next trip": name, one-line tease, no tools yet. */
+:root{
+  --cobalt:#1F4FD8; --yellow:#FFD60A; --sunflower:#FFC400; --navy:#0A1A5C; --ink:#0B0B0F; --paper:#F3F1EC; --white:#FFFFFF;
+  --link:#1F4FD8; --coral:#FF6B5B; --money:#22C55E; --gray:#B4BAC6; --muted:#4A4E5C; --line:#DEDBD3; --card:#FFFFFF;
+  --road:#24379A; --block:#173FB0; --block2:#0E2A8C; --dim:#16267A; --dim2:#0F1C5C; --dimline:#2B3C8F;
+  --f-head:'Poppins',system-ui,sans-serif; --f-body:'Inter',system-ui,sans-serif; --f-note:'Kalam','Comic Sans MS',cursive; --f-label:'Instrument Serif',Georgia,serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0C1024; --card:#141A36; --ink:#F3F1EC; --muted:#AEB4C6; --line:#2A3360; --link:#9DB8FF; color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0C1024; --card:#141A36; --ink:#F3F1EC; --muted:#AEB4C6; --line:#2A3360; --link:#9DB8FF; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--f-body);
+  padding:20px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-head);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0;text-wrap:balance}
+p{margin:0}
+a{color:var(--link)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
+/* header: night sky, yellow ring, the rhino */
+.top{position:relative;overflow:hidden;background:var(--navy);color:#fff;border:3px solid #0B0B0F;border-radius:18px;padding:18px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.top::after{content:"";position:absolute;right:-52px;top:-52px;width:112px;height:112px;border-radius:50%;
+  border:14px solid var(--yellow);box-shadow:0 0 0 3px #0B0B0F,inset 0 0 0 3px #0B0B0F,0 0 40px rgba(255,214,10,.45);opacity:.95}
+.top img{width:58px;height:58px;border-radius:50%;display:block;position:relative;z-index:1;border:2px solid #0B0B0F}
+.top > div{position:relative;z-index:1}
+.top .label{font:italic 20px/1.15 var(--f-label);color:var(--yellow);padding-right:64px}
+.top .label .h{display:block;font:700 12px/1.4 var(--f-head);color:#fff;white-space:nowrap}
+.top h1{font-size:clamp(30px,8vw,44px);margin-top:4px}
+.top .sub{font-size:14px;color:#DCE3FA;margin-top:6px;max-width:46ch}
+.pill{background:var(--yellow);color:#0B0B0F;font-weight:800;padding:0 .14em .04em;border-radius:10px;border:3px solid #0B0B0F;display:inline-block;line-height:1.05}
+/* the city map */
+.city{background:var(--navy);border:3px solid #0B0B0F;border-radius:18px;overflow:hidden;position:relative}
+.city svg{display:block;width:100%;height:auto}
+.city .hint{position:absolute;left:14px;top:8px;font:700 13px/1.1 var(--f-note);color:var(--yellow);transform:rotate(-2deg);pointer-events:none}
+.city a{outline-offset:-2px}
+.city a:focus-visible .hit{stroke:var(--yellow);stroke-width:4}
+.city .hit{fill:transparent;stroke:transparent;transition:stroke .15s}
+.city a:hover .hit{stroke:rgba(255,214,10,.6);stroke-width:3}
+@media (prefers-reduced-motion:no-preference){
+  .glow{animation:glow 3.2s ease-in-out infinite}
+  @keyframes glow{0%,100%{opacity:.55}50%{opacity:1}}
+  .puff{animation:puff 4s ease-in-out infinite}
+  .puff:nth-child(2){animation-delay:1.3s}
+  .puff:nth-child(3){animation-delay:2.6s}
+  @keyframes puff{0%{transform:translateY(0);opacity:0}20%{opacity:.9}100%{transform:translateY(-22px);opacity:0}}
+}
+/* district cards */
+.districts{display:grid;grid-template-columns:1fr;gap:14px}
+.d{background:var(--card);border:2px solid var(--line);border-radius:16px;overflow:hidden}
+.d[open]{border-color:var(--ink)}
+.d.open{border:3px solid var(--ink)}
+.d summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--cobalt);color:#fff;min-height:56px}
+.d summary::-webkit-details-marker{display:none}
+.d.locked summary{background:var(--dim);color:#DCE3FA}
+.ring{flex:none;width:32px;height:32px;border-radius:50%;border:5px solid var(--yellow);box-shadow:0 0 0 2px #0B0B0F,inset 0 0 0 2px #0B0B0F;display:grid;place-items:center;font:800 13px/1 var(--f-head);color:#fff;background:var(--navy)}
+.d.locked .ring{border-color:#8A93B8;color:#DCE3FA}
+.d summary b{font:800 17px/1.1 var(--f-head);text-transform:lowercase}
+.d summary small{display:block;font:500 12.5px/1.2 var(--f-body);opacity:.85;margin-top:2px;text-transform:none}
+.badge{margin-left:auto;flex:none;font:700 12px/1 var(--f-head);background:var(--yellow);color:#0B0B0F;border:2px solid #0B0B0F;border-radius:999px;padding:5px 10px;white-space:nowrap}
+.d.locked .badge{background:#0B0B0F;color:#DCE3FA;border-color:#2B3C8F}
+.d .body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:10px}
+.d .body p{font-size:15px}
+.d .body .muted{color:var(--muted);font-size:14px}
+.tools{display:grid;grid-template-columns:1fr;gap:10px;margin-top:4px}
+.tool{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:12px 14px;min-height:64px;box-shadow:3px 4px 0 #0B0B0F}
+.tool:active{transform:translate(2px,2px);box-shadow:1px 2px 0 #0B0B0F}
+.tool svg{flex:none;width:40px;height:40px}
+.tool b{font:800 16px/1.15 var(--f-head);display:block;text-transform:lowercase}
+.tool span{font-size:13.5px;color:var(--muted)}
+.tool .go{margin-left:auto;font:800 20px var(--f-head);color:var(--link)}
+.btn{display:inline-flex;align-items:center;justify-content:center;font:700 14px var(--f-head);border:2px solid #0B0B0F;background:var(--yellow);color:#0B0B0F;border-radius:999px;padding:10px 16px;min-height:44px;box-shadow:3px 4px 0 #0B0B0F;text-decoration:none;white-space:nowrap}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.note{font:700 17px/1.15 var(--f-note);color:var(--link);transform:rotate(-1.5deg);display:inline-block}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+/* footer */
+.foot{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:8px;align-items:center;text-align:center}
+.foot nav{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 14px}
+.foot nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;font-weight:600}
+.sig{font:700 15px var(--f-note);color:var(--ink)}
+@media (min-width:640px){
+  .top img{width:74px;height:74px}
+  .top::after{width:150px;height:150px;right:-46px;top:-46px;border-width:18px}
+  .top > div{padding-right:112px}
+  .top .label{padding-right:0}
+  .districts{grid-template-columns:1fr 1fr}
+  .d.open{grid-column:1/-1}
+  .tools{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<main class="wrap">
+  <header class="top">
+    <img src="clock/img/avatar.jpg" alt="Rhino, the HeyRhino host, in his glasses and black hoodie" width="74" height="74">
+    <div>
+      <div class="label">Rhino's Lab <span class="h">@heyrhinotv</span></div>
+      <h1>your body is a <span class="pill">city.</span></h1>
+      <p class="sub">Inside the Rhino: I shrink down and give the tour. Every trip leaves a free tool and a one-page cheat sheet here. Tap a district.</p>
+    </div>
+  </header>
+
+  <section class="city" aria-label="The Body City map">
+    <svg viewBox="0 0 720 300" role="img" aria-labelledby="mapT mapD">
+      <title id="mapT">The Body City: four districts</title>
+      <desc id="mapD">A night skyline. The energy drink district is lit, with a glowing yellow ring on the processing plant. Three dark districts are coming next: the all-nighter, out cold, and the first workout.</desc>
+      <defs>
+        <radialGradient id="g1" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFD60A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD60A" stop-opacity="0"/></radialGradient>
+        <pattern id="win" width="14" height="16" patternUnits="userSpaceOnUse"><rect x="3" y="3" width="7" height="9" fill="#FFD60A"/></pattern>
+        <pattern id="winD" width="14" height="16" patternUnits="userSpaceOnUse"><rect x="3" y="3" width="7" height="9" fill="#24379A"/></pattern>
+      </defs>
+      <!-- sky -->
+      <rect width="720" height="300" fill="#0A1A5C"/>
+      <g fill="#DCE3FA" opacity=".8">
+        <circle cx="40" cy="30" r="1.6"/><circle cx="130" cy="18" r="1.2"/><circle cx="300" cy="40" r="1.4"/><circle cx="420" cy="22" r="1.1"/><circle cx="520" cy="52" r="1.5"/><circle cx="640" cy="26" r="1.3"/><circle cx="690" cy="70" r="1"/><circle cx="230" cy="70" r="1"/><circle cx="580" cy="90" r="1.2"/>
+      </g>
+      <!-- distant blocks -->
+      <g fill="#0F1C5C" stroke="#2B3C8F" stroke-width="2">
+        <rect x="0" y="150" width="60" height="100"/><rect x="200" y="120" width="30" height="130"/><rect x="380" y="140" width="34" height="110"/><rect x="545" y="160" width="28" height="90"/><rect x="700" y="130" width="40" height="120"/>
+      </g>
+      <!-- ground + road + the trip line -->
+      <rect x="0" y="250" width="720" height="50" fill="#0E2A8C"/>
+      <rect x="0" y="262" width="720" height="22" fill="#24379A"/>
+      <path d="M118 273 C 200 273, 230 273, 300 273 S 460 273, 640 273" fill="none" stroke="#FFD60A" stroke-width="4" stroke-dasharray="10 9" stroke-linecap="round" opacity=".9"/>
+      <path d="M118 273 L 150 273" fill="none" stroke="#FFD60A" stroke-width="4" stroke-linecap="round"/>
+
+      <!-- District 1: the energy drink (the processing plant), lit -->
+      <a href="#d1" aria-label="District 1, the energy drink: open">
+        <g>
+          <circle class="glow" cx="118" cy="168" r="70" fill="url(#g1)"/>
+          <g class="puffs" fill="#DCE3FA" opacity=".85">
+            <circle class="puff" cx="176" cy="96" r="6"/><circle class="puff" cx="182" cy="92" r="7"/><circle class="puff" cx="172" cy="90" r="5"/>
+          </g>
+          <rect x="166" y="100" width="18" height="60" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="3"/>
+          <path d="M40 160 L70 130 L100 160 L130 130 L160 160 L190 130 L190 250 L40 250 Z" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="3" stroke-linejoin="round"/>
+          <rect x="48" y="170" width="140" height="70" fill="url(#win)" opacity=".9"/>
+          <rect x="40" y="160" width="150" height="90" fill="none" stroke="#0B0B0F" stroke-width="3"/>
+          <rect x="105" y="214" width="26" height="36" fill="#0B0B0F"/>
+          <!-- the yellow ring portal on the front wall -->
+          <circle cx="118" cy="186" r="30" fill="#0A1A5C" stroke="#0B0B0F" stroke-width="3"/>
+          <circle cx="118" cy="186" r="26" fill="none" stroke="#FFD60A" stroke-width="7"/>
+          <circle cx="118" cy="186" r="29.5" fill="none" stroke="#0B0B0F" stroke-width="2"/>
+          <circle cx="118" cy="186" r="22.5" fill="none" stroke="#0B0B0F" stroke-width="2"/>
+          <!-- the can on the roof sign -->
+          <rect x="60" y="106" width="22" height="34" rx="4" fill="#1F4FD8" stroke="#0B0B0F" stroke-width="3"/>
+          <rect x="60" y="116" width="22" height="8" fill="#FFD60A"/>
+          <line x1="71" y1="140" x2="71" y2="150" stroke="#0B0B0F" stroke-width="3"/>
+          <rect class="hit" x="34" y="84" width="162" height="172" rx="10"/>
+        </g>
+      </a>
+
+      <!-- District 2: the all-nighter (the port, brain dome), dark -->
+      <a href="#d2" aria-label="District 2, the all-nighter: next trip">
+        <g>
+          <rect x="250" y="150" width="90" height="100" fill="#16267A" stroke="#2B3C8F" stroke-width="3"/>
+          <rect x="258" y="160" width="74" height="84" fill="url(#winD)"/>
+          <path d="M262 150 A33 33 0 0 1 328 150 Z" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3"/>
+          <path d="M275 140 q6 -10 12 0 q6 -10 12 0 q6 -10 12 0" fill="none" stroke="#2B3C8F" stroke-width="3" stroke-linecap="round"/>
+          <rect x="300" y="100" width="6" height="52" fill="#2B3C8F"/>
+          <circle cx="303" cy="98" r="5" fill="#0F1C5C" stroke="#2B3C8F" stroke-width="3"/>
+          <g transform="translate(281 176)"><rect width="28" height="28" rx="6" fill="#0B0B0F" stroke="#8A93B8" stroke-width="2"/><rect x="8" y="12" width="12" height="9" rx="1.5" fill="#8A93B8"/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#8A93B8" stroke-width="2.5"/></g>
+          <rect class="hit" x="244" y="90" width="102" height="166" rx="10"/>
+        </g>
+      </a>
+
+      <!-- District 3: out cold (the clinic with the lamp), dark -->
+      <a href="#d3" aria-label="District 3, out cold: next trip">
+        <g>
+          <rect x="400" y="130" width="110" height="120" fill="#16267A" stroke="#2B3C8F" stroke-width="3"/>
+          <rect x="408" y="142" width="94" height="100" fill="url(#winD)"/>
+          <rect x="440" y="100" width="30" height="30" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3"/>
+          <rect x="451" y="106" width="8" height="18" fill="#2B3C8F"/><rect x="446" y="111" width="18" height="8" fill="#2B3C8F"/>
+          <path d="M470 118 h40 v-12 l-10 -8" fill="none" stroke="#2B3C8F" stroke-width="3" stroke-linecap="round"/>
+          <path d="M490 100 l12 10 l-24 0 z" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3" stroke-linejoin="round"/>
+          <g transform="translate(441 176)"><rect width="28" height="28" rx="6" fill="#0B0B0F" stroke="#8A93B8" stroke-width="2"/><rect x="8" y="12" width="12" height="9" rx="1.5" fill="#8A93B8"/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#8A93B8" stroke-width="2.5"/></g>
+          <rect class="hit" x="394" y="88" width="122" height="168" rx="10"/>
+        </g>
+      </a>
+
+      <!-- District 4: the first workout (the gym block), dark -->
+      <a href="#d4" aria-label="District 4, the first workout: next trip">
+        <g>
+          <rect x="570" y="170" width="120" height="80" fill="#16267A" stroke="#2B3C8F" stroke-width="3"/>
+          <rect x="578" y="182" width="104" height="60" fill="url(#winD)"/>
+          <path d="M570 170 L630 136 L690 170 Z" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3" stroke-linejoin="round"/>
+          <g stroke="#2B3C8F" stroke-width="4" stroke-linecap="round"><line x1="604" y1="156" x2="656" y2="156"/><rect x="598" y="148" width="8" height="16" rx="2" fill="#1F2F7E"/><rect x="654" y="148" width="8" height="16" rx="2" fill="#1F2F7E"/></g>
+          <g transform="translate(616 196)"><rect width="28" height="28" rx="6" fill="#0B0B0F" stroke="#8A93B8" stroke-width="2"/><rect x="8" y="12" width="12" height="9" rx="1.5" fill="#8A93B8"/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#8A93B8" stroke-width="2.5"/></g>
+          <rect class="hit" x="564" y="128" width="132" height="128" rx="10"/>
+        </g>
+      </a>
+    </svg>
+    <div class="hint">start here ↓</div>
+  </section>
+
+  <section class="districts" aria-label="Districts">
+    <details class="d open" id="d1" open>
+      <summary><span class="ring">1</span><span><b>the energy drink</b><small>stomach · brain · heart · sleep · who profits</small></span><span class="badge">open</span></summary>
+      <div class="body">
+        <p>One can, start to finish: what it does to your stomach, your brain, your heart and your sleep, and who makes money on every sip. Two things from the trip, free, no sign-up:</p>
+        <div class="tools">
+          <a class="tool" href="clock/">
+            <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#0A1A5C" stroke="#0B0B0F" stroke-width="2.5"/><circle cx="20" cy="20" r="14" fill="none" stroke="#FFD60A" stroke-width="4"/><line x1="20" y1="20" x2="20" y2="11" stroke="#fff" stroke-width="3" stroke-linecap="round"/><line x1="20" y1="20" x2="26" y2="24" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
+            <span><b>your caffeine clock</b><span>pick your can and your bedtime, see what's still in you</span></span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+          <a class="tool" href="notes/">
+            <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="4" width="26" height="32" rx="3" fill="#F3F1EC" stroke="#0B0B0F" stroke-width="2.5"/><line x1="13" y1="13" x2="27" y2="13" stroke="#1F4FD8" stroke-width="3" stroke-linecap="round"/><line x1="13" y1="20" x2="27" y2="20" stroke="#0B0B0F" stroke-width="2.5" stroke-linecap="round"/><line x1="13" y1="27" x2="22" y2="27" stroke="#0B0B0F" stroke-width="2.5" stroke-linecap="round"/><rect x="24" y="24" width="10" height="8" rx="2" fill="#FFD60A" stroke="#0B0B0F" stroke-width="2"/></svg>
+            <span><b>rhino's notes</b><span>the one-page cheat sheet, every number sourced, print it</span></span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+        </div>
+        <div class="row"><a class="btn" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a><span class="note">the whole tour, start to finish.</span></div>
+      </div>
+    </details>
+
+    <details class="d locked" id="d2">
+      <summary><span class="ring">2</span><span><b>the all-nighter</b><small>what staying up actually does to your brain</small></span><span class="badge">next trip</span></summary>
+      <div class="body">
+        <p>Hour by hour through a night with no sleep, from the first yawn to the 4 AM fog.</p>
+        <p class="muted">Tool on the way: the <b>4 AM brain calculator</b>. Tell it when you woke up, it tells you how foggy your brain is right now, and when it gets its edge back.</p>
+      </div>
+    </details>
+
+    <details class="d locked" id="d3">
+      <summary><span class="ring">3</span><span><b>out cold</b><small>what puts you under for surgery, and the bill</small></span><span class="badge">next trip</span></summary>
+      <div class="body">
+        <p>The surgeon's-eye view: what happens in the minutes between "count back from ten" and waking up, and who sends the invoice.</p>
+        <p class="muted">Tools on the way: the <b>out-cold timeline</b> and a <b>bill estimator</b> that shows where the money goes.</p>
+      </div>
+    </details>
+
+    <details class="d locked" id="d4">
+      <summary><span class="ring">4</span><span><b>the first workout</b><small>why day two hurts more than day one</small></span><span class="badge">next trip</span></summary>
+      <div class="body">
+        <p>Your first real workout in a while, from the inside: what tears, what rebuilds, and why the soreness shows up late.</p>
+        <p class="muted">Tool on the way: the <b>muscle clock</b>. When it'll hurt most, when it stops, and when to go again.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="row" style="justify-content:center">
+    <a class="btn" href="https://www.youtube.com/@heyrhinotv">subscribe, get the next trip first</a>
+  </section>
+
+  <footer class="foot">
+    <nav aria-label="HeyRhino elsewhere">
+      <a href="https://www.youtube.com/@heyrhinotv">YouTube</a>
+      <a href="https://www.instagram.com/heyrhinotv/">Instagram</a>
+      <a href="https://www.tiktok.com/@heyrhinotv">TikTok</a>
+    </nav>
+    <p>Rhino's Lab is a free page: no sign-up, no cookies, no tracking. Nothing here is medical advice; it's the tour.</p>
+    <p class="sig">© 2026 HeyRhino · welcome to the crash 🦏</p>
+  </footer>
+</main>
+
+<script>
+// Tapping a district on the map opens its card; the browser's own anchor jump does the scrolling (smooth unless reduced motion).
+document.querySelectorAll('.city a[href^="#"]').forEach(a => a.addEventListener('click', () => {
+  const d = document.getElementById(a.getAttribute('href').slice(1));
+  if (d) d.open = true;
+}));
+</script>
+</html>
