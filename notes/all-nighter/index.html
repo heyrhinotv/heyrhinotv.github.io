@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rhino's notes: one all-nighter</title>
+<meta name="description" content="The one-page cheat sheet for Inside the Rhino: what one night without sleep does to your brain, memory, mood and hunger, and what it costs to pay back. Every number sourced.">
+<link rel="icon" href="../img/avatar.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@700;800&family=Inter:wght@400;600;700&family=Kalam:wght@700&family=Instrument+Serif:ital@1&display=swap">
+<style>
+/* Layout: on screen, phone-first single column (people arrive from a YouTube description): header → big idea → four stops → receipt / rule / label → clock → sources.
+   In print, the same content packs onto one US Letter page: 2×2 stops, a row of three boxes, sources in the footer. */
+:root{
+  --cobalt:#1F4FD8; --yellow:#FFD60A; --navy:#0A1A5C; --ink:#0B0B0F; --paper:#F3F1EC; --white:#FFFFFF;
+  --coral:#FF6B5B; --money:#22C55E; --muted:#4A4E5C; --line:#DEDBD3; --card:#FFFFFF;
+  --f-head:'Poppins',system-ui,sans-serif; --f-body:'Inter',system-ui,sans-serif; --f-note:'Kalam','Comic Sans MS',cursive; --f-label:'Instrument Serif',Georgia,serif;
+}
+@media screen and (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0C1024; --card:#141A36; --ink:#F3F1EC; --muted:#AEB4C6; --line:#2A3360; color-scheme:dark}}
+:root[data-theme="dark"]{--paper:#0C1024; --card:#141A36; --ink:#F3F1EC; --muted:#AEB4C6; --line:#2A3360; color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--f-body);
+  padding:20px max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px))}
+.sheet{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-head);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin:0;text-wrap:balance}
+p{margin:0}
+/* header: the navy night sky with the yellow ring */
+.top{position:relative;overflow:hidden;background:var(--navy);color:#fff;border:3px solid #0B0B0F;border-radius:18px;padding:18px 18px 16px;display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.top::after{content:"";position:absolute;right:-52px;top:-52px;width:112px;height:112px;border-radius:50%;
+  border:14px solid var(--yellow);box-shadow:0 0 0 3px #0B0B0F,inset 0 0 0 3px #0B0B0F,0 0 40px rgba(255,214,10,.45);opacity:.95}
+.top img{width:58px;height:58px;border-radius:50%;display:block;position:relative;z-index:1}
+.top .label{font:italic 18px/1.15 var(--f-label);color:var(--yellow);padding-right:52px}
+.top h1{font-size:clamp(30px,8vw,44px);margin-top:4px;position:relative;z-index:1}
+.top .sub{font-size:14px;color:#DCE3FA;margin-top:6px;position:relative;z-index:1}
+.top .label .h{font:700 12px var(--f-head);color:#fff;margin-left:6px;white-space:nowrap}
+.top > div{position:relative;z-index:1}
+/* pills: yellow = emphasis, green = money, coral = body risk (each colour one job) */
+.pill{background:var(--yellow);color:#0B0B0F;font-weight:700;padding:0 .2em;border-radius:.2em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.money{background:var(--money);color:#0B0B0F;font-weight:700;padding:0 .2em;border-radius:.2em}
+.risk{background:var(--coral);color:#0B0B0F;font-weight:700;padding:0 .2em;border-radius:.2em}
+.idea{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.idea h2{font-size:clamp(22px,5.6vw,28px)}
+.idea h2 .pill{border:3px solid #0B0B0F;padding:0 .14em .04em;border-radius:10px}
+.idea p{color:var(--muted);font-size:15px}
+/* the trip: four stops */
+.trip{display:grid;grid-template-columns:1fr;gap:14px}
+.stop{background:var(--card);border:2px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.stop header{background:var(--cobalt);color:#fff;display:flex;align-items:center;gap:10px;padding:8px 12px}
+.ring{flex:none;width:30px;height:30px;border-radius:50%;border:5px solid var(--yellow);box-shadow:0 0 0 2px #0B0B0F,inset 0 0 0 2px #0B0B0F;
+  display:grid;place-items:center;font:800 13px/1 var(--f-head);color:#fff}
+.stop header b{font:800 15px/1.1 var(--f-head);text-transform:lowercase}
+.stop header .when{margin-left:auto;font:700 12px/1 var(--f-head);background:var(--yellow);color:#0B0B0F;border:2px solid #0B0B0F;border-radius:999px;padding:4px 9px;white-space:nowrap}
+.body{padding:12px 14px 14px;display:grid;grid-template-columns:1fr 72px;gap:10px;align-items:start}
+.body h3{font-size:19px;margin-bottom:4px;text-transform:lowercase}
+.body p{font-size:14.5px}
+.body p+p{margin-top:6px}
+.art{display:flex;flex-direction:column;align-items:center;gap:4px}
+.art img{width:100%;height:auto;display:block}
+.art.two img{width:78%}
+.myth{grid-column:1/-1;border-top:2px dashed var(--line);padding-top:8px}
+.myth h4{margin:0 0 2px;font:800 15px/1.2 var(--f-head);text-transform:lowercase}
+.math{font:800 15px/1.4 var(--f-head);color:var(--cobalt);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin:4px 0}
+.math span{background:var(--card);border:2px solid var(--cobalt);border-radius:8px;padding:1px 7px;white-space:nowrap}
+.math .last{background:var(--yellow);border-color:#0B0B0F;color:#0B0B0F}
+.note{font:700 18px/1.15 var(--f-note);color:var(--cobalt);transform:rotate(-2deg);display:inline-block}
+/* boxes */
+.boxes{display:grid;grid-template-columns:1fr;gap:14px}
+.box{background:var(--card);border:3px solid var(--ink);border-radius:16px;padding:12px 14px;font-size:14.5px;display:flex;flex-direction:column;gap:6px}
+.box h3{font-size:18px;text-transform:lowercase}
+.box.rule{background:var(--yellow);color:#0B0B0F;border-color:#0B0B0F}
+.receipt{font:600 13.5px/1.5 ui-monospace,'Cascadia Mono',Consolas,monospace;background:#FFFFFF;color:#0B0B0F;border:2px solid #0B0B0F;border-radius:6px;padding:10px 12px;
+  -webkit-mask:radial-gradient(circle 6px at 50% 0,transparent 98%,#000) top/14px 100% repeat-x}
+.receipt h3{font:800 15px var(--f-head);text-align:center;margin-bottom:4px;text-transform:lowercase}
+.receipt .ln{display:flex;justify-content:space-between;gap:10px;border-bottom:1px dashed #9AA0AE;padding:2px 0}
+.receipt .ln:last-child{border:0;font-weight:800}
+.receipt .ln span:first-child{white-space:nowrap}
+.receipt .ln span:last-child{text-align:right}
+/* clock + footer */
+.clock{background:var(--navy);color:#fff;border:3px solid #0B0B0F;border-radius:16px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
+.clock b{font:800 18px var(--f-head)}
+.clock p{color:#DCE3FA;font-size:14px}
+.btn{display:inline-block;font:700 14px var(--f-head);border:2px solid #0B0B0F;background:var(--yellow);color:#0B0B0F;border-radius:999px;padding:8px 16px;box-shadow:3px 4px 0 #0B0B0F;text-decoration:none;white-space:nowrap}
+.btn:focus-visible,a:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
+.dl{display:flex;justify-content:center}
+.foot{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.foot b{color:var(--ink)}
+.foot ol{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:2px}
+.foot a{color:var(--cobalt)}
+@media screen{.foot ol{gap:8px}.foot a{display:inline-block;padding:5px 0}} /* phone tap targets ≥24 px (WCAG 2.5.8) */
+.sig{font:700 15px var(--f-note);color:var(--ink);text-align:center}
+@media (min-width:640px){
+  .top img{width:74px;height:74px}
+  .top::after{width:150px;height:150px;right:-46px;top:-46px;border-width:18px}
+  .top > div{padding-right:112px}
+  .top .label{padding-right:0}
+  .body{grid-template-columns:1fr 92px}
+  .trip{grid-template-columns:1fr 1fr}
+  .boxes{grid-template-columns:1.05fr 1fr 1fr}
+}
+
+/* ---------- print: one US Letter page ---------- */
+@page{size:Letter;margin:0}
+@media print{
+  :root{--paper:#F3F1EC;--card:#FFFFFF;--ink:#0B0B0F;--muted:#3B3F4C;--line:#D3CFC5}
+  html,body{width:8.5in;height:11in}
+  body{padding:.32in .38in .26in;font-size:10.4px;line-height:1.36;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet{max-width:none;gap:7px;height:100%}
+  .top{padding:9px 12px 12px;border-radius:12px;gap:10px;align-items:start}
+  .top > div{padding-right:96px}
+  .top img{width:54px;height:54px}
+  .top::after{width:116px;height:116px;right:-34px;top:-40px;border-width:14px}
+  .top .label{font-size:14px} .top h1{font-size:30px} .top .sub{font-size:11px;margin-top:3px}
+  .top .label .h{font-size:10.5px}
+  .idea{padding:7px 12px;border-radius:12px;border-width:2.5px;flex-direction:row;align-items:baseline;gap:12px}
+  .idea h2{font-size:19px;white-space:nowrap} .idea p{font-size:10.4px}
+  .trip{grid-template-columns:1fr 1fr;gap:7px}
+  .stop{border-radius:12px;break-inside:avoid}
+  .stop header{padding:4px 9px;gap:7px}
+  .ring{width:21px;height:21px;border-width:4px;font-size:10px}
+  .stop header b{font-size:12px} .stop header .when{font-size:9.5px;padding:2px 7px}
+  .body{padding:6px 9px 7px;grid-template-columns:1fr 62px;gap:7px}
+  .body h3{font-size:13.5px;margin-bottom:2px}
+  .body p{font-size:10.2px} .body p+p{margin-top:3px}
+  .myth{padding-top:4px} .myth h4{font-size:11px}
+  .math{font-size:10.4px;margin:2px 0;gap:2px 5px;flex-wrap:nowrap} .math span{padding:0 4px;border-width:1.5px}
+  .note{font-size:13px}
+  .boxes{grid-template-columns:1.05fr 1fr 1fr;gap:7px}
+  .box{border-radius:12px;border-width:2.5px;padding:7px 10px;font-size:10.2px;gap:3px}
+  .box h3{font-size:13px}
+  .receipt{font-size:9.6px;padding:6px 8px;line-height:1.38}
+  .receipt h3{font-size:11px;margin-bottom:2px}
+  .clock{padding:6px 12px;border-radius:12px;border-width:2.5px;gap:4px 12px}
+  .clock b{font-size:13px} .clock p{font-size:10px}
+  .btn{font-size:11px;padding:4px 11px;box-shadow:2px 3px 0 #0B0B0F}
+  .dl{display:none}
+  .foot{font-size:7.4px;line-height:1.3;gap:2px;margin-top:auto}
+  .foot ol{display:block;columns:2;column-gap:14px;padding-left:12px}
+  .foot ol li{break-inside:avoid}
+  .foot a{color:inherit;text-decoration:none}
+  .sig{font-size:11px}
+}
+/* this sheet's title is one word shorter: keep it clear of the corner ring on phones, like the label */
+@media screen and (max-width:639px){.top h1{padding-right:44px}}
+</style>
+
+<main class="sheet">
+  <header class="top">
+    <img src="../img/avatar.jpg" alt="Rhino, the HeyRhino host, in his glasses and black hoodie" width="74" height="74">
+    <div>
+      <div class="label">Inside the Rhino · Rhino's notes <span class="h">@heyrhinotv</span></div>
+      <h1>one <span style="white-space:nowrap">all-nighter.</span></h1>
+      <p class="sub">What one night without sleep does to your brain, your mood, your memory and your hunger, hour by hour. And what it costs to pay back.</p>
+    </div>
+  </header>
+
+  <section class="idea" aria-label="The big idea">
+    <h2>it's not time. it's a <span class="pill">debt.</span></h2>
+    <p>An all-nighter doesn't give you extra hours. It borrows them, and the bill takes days, not hours, to pay back. Call it the sleep debt.</p>
+  </section>
+
+  <section class="trip" aria-label="The four stops">
+    <article class="stop">
+      <header><span class="ring">1</span><b>brain harbor</b><span class="when">1 a.m.</span></header>
+      <div class="body">
+        <div>
+          <h3>on some tests, you're buzzed.</h3>
+          <p>All day your brain piles up <b>adenosine</b>, the mail carrier with one message: "you're tired." That pile is your sleep pressure. Caffeine sits in its docks and blocks the mail; it doesn't remove it. <span class="pill">Only sleep clears the docks.</span></p>
+          <p>Up since 7 a.m.? At 1 a.m. that's <b>18 hours</b>. In one study, 39 people were kept awake 28 hours and, another time, given measured alcohol. After <b>17 to 19 hours</b> awake, on some tests they did as badly as, or worse than, at <span class="risk">0.05% blood alcohol</span>. Some reaction times were up to 50% slower. Even longer awake, they reached the level of the most alcohol anyone in the study was given.</p>
+        </div>
+        <div class="art"><img src="../img/mail.png" alt="Adenosine, a tired envelope mail carrier" width="70" height="92"></div>
+        <div class="myth">
+          <h4>driving to the exam?</h4>
+          <p>Drivers who'd slept only 4 or 5 hours had about <span class="risk">4× the crash rate</span> of drivers who slept 7 or more. Sleepy behind the wheel? Pull over.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="stop">
+      <header><span class="ring">2</span><b>control room</b><span class="when">4 a.m.</span></header>
+      <div class="body">
+        <div>
+          <h3>memories saved worse. alarm louder.</h3>
+          <p>The memory desk (the hippocampus): after one night without sleep, people in one study saved new memories <span class="risk">up to 40% worse</span>. You stay up to remember the material, on the night your brain is worst at saving it.</p>
+          <p>Your alarm center (the amygdala) reacted about <span class="risk">60% harder</span> to upsetting pictures in one small brain-scan study, and its line to the calm-down part got weaker. That's why one bad practice question feels like the end of the world.</p>
+        </div>
+        <div class="art">
+          <svg viewBox="0 0 92 92" width="92" height="92" role="img" aria-label="A ringing alarm bell">
+            <path d="M22 22 l-8 -8 M70 22 l8 -8 M12 40 h-8 M80 40 h8" stroke="#0B0B0F" stroke-width="4" stroke-linecap="round"/>
+            <path d="M46 14 c-16 0 -24 12 -24 28 v14 l-8 10 h64 l-8 -10 v-14 c0 -16 -8 -28 -24 -28 z" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M32 40 c0 -9 5 -15 12 -16" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+            <circle cx="46" cy="74" r="8" fill="#FFD60A" stroke="#0B0B0F" stroke-width="4"/>
+            <rect x="42" y="6" width="8" height="9" rx="3" fill="#0B0B0F"/>
+          </svg>
+        </div>
+        <div class="myth">
+          <h4>the night sweepers: still being argued about.</h4>
+          <p>In sleeping mice, the gaps between brain cells opened about 60% wider and fluid washed waste out. A 2024 mouse study found the opposite, and scientists are still arguing. In people, one small study found a sticky protein, beta-amyloid, up about <b>5%</b> in two memory areas after one night awake. That's a marker in one small study, not a diagnosis.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="stop">
+      <header><span class="ring">3</span><b>the exam</b><span class="when">9 a.m.</span></header>
+      <div class="body">
+        <div>
+          <h3>hungrier, foggier, still taking the test.</h3>
+          <p>Your adenosine pile is the biggest it's been all night, caffeine or not.</p>
+          <p>After <b>two short nights</b> (4 hours in bed), 12 young men had a hunger hormone up 28%, <span class="pill">hunger up 24%</span>, and cravings for chips, sweets and bread up by a third or more. Want a pastry and three snacks? That's the debt talking.</p>
+          <p>In one study of 111 college students, two out of three pulled at least one all-nighter that semester. The ones who did it a lot had lower grades: a link, not proof.</p>
+        </div>
+        <div class="art"><img src="../img/stomach.png" alt="Stomach crew worker with a wrench" width="92" height="92"></div>
+      </div>
+    </article>
+
+    <article class="stop">
+      <header><span class="ring">4</span><b>the bank</b><span class="when">the bill</span></header>
+      <div class="body">
+        <div>
+          <h3>one lost hour, four days to pay back.</h3>
+          <p>In one lab study of 15 young men, being about <b>1 hour</b> short took <span class="pill">4 days</span> of extra sleep to get back to their best. In another study, sleeping in on the weekend didn't undo what short nights did to metabolism.</p>
+          <p>Zoom out: one estimate says short sleep costs the U.S. up to <span class="money">$411 billion a year</span>, about 1.2 million working days.</p>
+          <p>And the part of an energy drink that keeps you up costs <span class="money">less than ⅓ of a penny</span>. The all-nighter is great business for everyone selling you a way to stay awake. <span class="note">the bill comes to you.</span></p>
+        </div>
+        <div class="art"><img src="../img/cart.png" alt="Crew worker pushing a cart of gold coins" width="92" height="78"></div>
+      </div>
+    </article>
+  </section>
+
+  <section class="boxes">
+    <div class="receipt" aria-label="Your receipt for one all-nighter">
+      <h3>your receipt for one all-nighter.</h3>
+      <div class="ln"><span>1 a.m.</span><span>as slow as buzzed, on some tests</span></div>
+      <div class="ln"><span>4 a.m.</span><span>memories saved worse, alarm louder</span></div>
+      <div class="ln"><span>9 a.m.</span><span>hungrier, foggier, still taking the exam</span></div>
+      <div class="ln"><span>the bill</span><span>one lost hour took 4 days to balance</span></div>
+      <div class="ln"><span>interest due</span><span>this week</span></div>
+    </div>
+    <div class="box rule">
+      <h3>rhino's rule.</h3>
+      <p>Two more hours of studying, or two more hours of sleep? The research points one way: <b>sleep is when the studying gets saved.</b></p>
+      <p>Stop the night early, sleep, review in the morning.</p>
+      <p><span class="note" style="color:#0A1A5C">you're not buying time. you're borrowing it.</span></p>
+    </div>
+    <div class="box">
+      <h3>how much is enough.</h3>
+      <p>Adults 18 to 60: <b>7 or more hours</b> a night, on a regular basis, say the sleep doctors' consensus. <span class="risk">6 or fewer</span> isn't enough to stay healthy and safe.</p>
+      <p>Studies are averages, and you aren't one. One night here and there is a debt, not a disaster.</p>
+    </div>
+  </section>
+
+  <section class="clock" aria-label="Sleep debt calculator">
+    <div><b>when do you cross the line tonight?</b><p>Type when you woke up and what tonight looks like: Rhino's sleep debt calculator does the math.</p></div>
+    <a class="btn" href="https://heyrhinotv.github.io/sleep/">heyrhinotv.github.io/sleep</a>
+  </section>
+
+  <footer class="foot">
+    <p><b>Education and entertainment, not medical advice.</b> Trouble sleeping, or sleepy while driving? Talk to a doctor, and never drive drowsy. Study numbers are averages from the groups named.</p>
+    <ol>
+      <li>Porkka-Heiskanen et al., <a href="https://www.science.org/doi/10.1126/science.276.5316.1265">Science 1997</a> (adenosine builds while awake)</li>
+      <li>Liu &amp; Xu, Hereditas 2026: <a href="https://link.springer.com/article/10.1186/s41065-026-00648-z">caffeine blocks adenosine receptors</a></li>
+      <li>Williamson &amp; Feyer, <a href="https://oem.bmj.com/content/57/10/649">Occup Environ Med 2000</a> (17–19 h awake vs 0.05% blood alcohol)</li>
+      <li>AAA Foundation for Traffic Safety, <a href="https://aaafoundation.org/research/acute-sleep-deprivation-risk-motor-vehicle-crash-involvement/">Acute Sleep Deprivation and Crash Risk 2016</a></li>
+      <li>Yoo et al., <a href="https://www.nature.com/articles/nn1851">Nature Neuroscience 2007</a> (memory saving) · <a href="https://news.harvard.edu/gazette/story/2007/02/study-shows-importance-of-sleep-for-optimal-memory-functioning/">Harvard Gazette</a></li>
+      <li>Yoo et al., <a href="https://www.cell.com/fulltext/S0960-9822(07)01783-6">Current Biology 2007</a> (amygdala) · <a href="https://newsarchive.berkeley.edu/news/media/releases/2007/10/22_sleeploss.shtml">UC Berkeley</a></li>
+      <li>Xie et al., <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3880190/">Science 2013</a> (mice: wider gaps during sleep)</li>
+      <li>Miao et al., <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC11156584/">Nature Neuroscience 2024</a> (mice: less clearance)</li>
+      <li>Shokri-Kojori et al., <a href="https://www.pnas.org/doi/10.1073/pnas.1721694115">PNAS 2018</a> (beta-amyloid after one night awake)</li>
+      <li>Spiegel et al., <a href="https://pubmed.ncbi.nlm.nih.gov/15583226/">Ann Intern Med 2004</a> (two short nights, hunger)</li>
+      <li>Thacher, <a href="https://pubmed.ncbi.nlm.nih.gov/18412035/">Behavioral Sleep Medicine 2008</a> (students and all-nighters)</li>
+      <li>Kitamura et al., <a href="https://www.nature.com/articles/srep35812">Scientific Reports 2016</a> (1 hour, 4 days)</li>
+      <li>Depner et al., <a href="https://doi.org/10.1016/j.cub.2019.01.069">Current Biology 2019</a> (weekend catch-up sleep)</li>
+      <li>RAND Europe, <a href="https://www.rand.org/pubs/research_reports/RR1791.html">Why Sleep Matters 2016</a> (cost estimate)</li>
+      <li>Pharmaoffer: <a href="https://pharmaoffer.com/api-excipient-supplier/transactions/caffeine-anhydrous">bulk caffeine prices</a> (≈ $14/kg → 200 mg ≈ $0.003)</li>
+      <li>Watson et al., AASM + Sleep Research Society, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4434546/">consensus 2015</a> (7+ hours for adults)</li>
+    </ol>
+    <p class="sig">© 2026 HeyRhino · welcome to the crash 🦏</p>
+  </footer>
+</main>
+</html>

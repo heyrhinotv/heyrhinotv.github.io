@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rhino's Sleep Debt Calculator</title>
+<meta name="description" content="Type when you woke up and what tonight looks like. See when you cross the buzzed line, how far under 7 hours you are, and what one lost hour costs to pay back.">
+<link rel="icon" href="img/avatar.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&family=Kalam:wght@700&display=swap">
+<style>
+/* Layout: phone-first single column (people arrive from a YouTube description or a Short).
+   Header → your night (inputs) → the result card + copy/share → Rhino's note → sources → footer. Same tokens as the caffeine clock. */
+:root{
+  --bg:#F3F1EC; --surface:#FFFFFF; --fg:#0B0B0F; --muted:#4A4E5C; --line:#DEDBD3;
+  --cobalt:#1F4FD8; --yellow:#FFD60A; --ink:#0B0B0F; --navy:#0A1A5C; --coral:#FF6B5B;
+  --seg:#EEF2FF; --seg-fg:#16328F; --warn-bg:#FFF4CC; --warn-fg:#5A4700;
+  --f-display:'Poppins',system-ui,sans-serif; --f-body:'Inter',system-ui,sans-serif; --f-note:'Kalam','Comic Sans MS',cursive;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1024; --surface:#141A36; --fg:#F3F1EC; --muted:#AEB4C6; --line:#2A3360;
+  --cobalt:#7FA0FF; --seg:#1E2A5E; --seg-fg:#C9D6FF; --warn-bg:#3A3210; --warn-fg:#FFE680; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0C1024; --surface:#141A36; --fg:#F3F1EC; --muted:#AEB4C6; --line:#2A3360;
+  --cobalt:#7FA0FF; --seg:#1E2A5E; --seg-fg:#C9D6FF; --warn-bg:#3A3210; --warn-fg:#FFE680; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2{font-family:var(--f-display);font-weight:800;letter-spacing:-.02em;line-height:1.12;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,7vw,40px)} h2{font-size:18px}
+p{margin:0}
+.brand{display:flex;align-items:center;gap:12px}
+.brand img{width:52px;height:52px;border-radius:50%;flex:none}
+.brand .t{display:flex;flex-direction:column;line-height:1.2}
+.brand b{font:800 15px var(--f-display)}
+.brand span{font-size:13px;color:var(--muted)}
+.hl{background:var(--yellow);color:#0B0B0F;padding:0 .16em;border-radius:.15em}
+.lede{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:14px}
+/* inputs: label left, control right; stacks under 420 px */
+.row{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+.row > label,.row > .lbl{font-weight:600;font-size:15px}
+.row[hidden]{display:none}
+input[type=time]{font:600 16px var(--f-body);min-height:44px;padding:6px 10px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--fg);width:9.2em;justify-self:end}
+input[type=time]:disabled{opacity:.45}
+.seg{display:inline-flex;justify-self:end;border:2px solid var(--ink);border-radius:999px;overflow:hidden;background:var(--seg)}
+.seg button{font:700 14px var(--f-display);min-height:44px;min-width:44px;padding:6px 14px;border:0;background:transparent;color:var(--seg-fg);cursor:pointer}
+.seg button + button{border-left:2px solid var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--yellow);color:#0B0B0F}
+.exam{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.check{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:14px;cursor:pointer}
+.check input{width:20px;height:20px;accent-color:var(--cobalt)}
+.inputs{gap:12px}
+@media (max-width:340px){.row{grid-template-columns:1fr}.row > *{justify-self:start}.exam{align-items:flex-start}}
+/* result */
+.result{background:var(--navy);border:3px solid var(--ink);color:#fff}
+.result .k{font:700 12px var(--f-display);text-transform:uppercase;letter-spacing:.1em;color:var(--yellow)}
+.result h2{font-size:clamp(28px,8vw,40px);color:#fff}
+.result h2 .hl{border:3px solid var(--ink);padding:0 .14em .04em;border-radius:10px}
+.lines{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;font-size:15px;color:#DCE3FA}
+.lines li{padding-left:14px;border-left:3px solid #2B3C8F}
+.lines b{color:#fff}
+.lines .risk{color:var(--coral)}
+.tag{font:600 11.5px var(--f-body);color:#AFC0F5;white-space:nowrap;text-decoration:underline;text-underline-offset:2px;margin-left:4px}
+.tag:hover{color:#fff}
+.warn{background:var(--warn-bg);color:var(--warn-fg);border-radius:12px;padding:12px 14px;font-weight:600}
+.btns{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
+.btn{font:700 14px var(--f-display);min-height:44px;border:2px solid var(--ink);background:var(--yellow);color:#0B0B0F;border-radius:999px;padding:8px 18px;cursor:pointer;box-shadow:3px 4px 0 var(--ink)}
+.btn.ghost{background:transparent;color:#fff;border-color:#fff;box-shadow:none}
+.copied{font:700 13px var(--f-body);color:var(--yellow)}
+button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
+.card:not(.result) button:focus-visible,.card:not(.result) input:focus-visible,.card:not(.result) a:focus-visible,summary:focus-visible,footer a:focus-visible{outline-color:var(--cobalt)}
+.note{font-family:var(--f-note);font-size:21px;color:var(--cobalt);text-align:center;transform:rotate(-1.5deg)}
+.small{font-size:13px;color:var(--muted)}
+details summary{cursor:pointer;font:700 15px var(--f-display);min-height:44px;display:flex;align-items:center}
+.sources ol{margin:8px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--muted)}
+.sources a{color:var(--cobalt);display:inline-block;padding:3px 0}
+.sources li:target{background:var(--warn-bg);color:var(--warn-fg);border-radius:6px}
+footer{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:10px;text-align:center}
+footer nav{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px}
+footer nav a{color:var(--cobalt);display:inline-flex;align-items:center;min-height:44px;font-weight:600}
+.disc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--fg)}
+</style>
+
+<div class="wrap">
+  <div class="brand"><img src="img/avatar.jpg" alt="HeyRhino" width="52" height="52"><div class="t"><b>HeyRhino</b><span>Inside the Rhino · What an all-nighter does to your body</span></div></div>
+
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <h1>Rhino's <span class="hl" style="white-space:nowrap">sleep debt</span> calculator</h1>
+    <p class="lede">Type when you woke up and what tonight looks like. Find your line. Nothing leaves your phone.</p>
+  </header>
+
+  <section class="card inputs" aria-labelledby="in-h">
+    <h2 id="in-h">Your night</h2>
+    <div class="row"><label for="wake">Woke up at</label><input id="wake" type="time" value="07:00" step="300"></div>
+    <div class="row"><span class="lbl" id="tn-l">Tonight</span>
+      <div class="seg" role="group" aria-labelledby="tn-l"><button type="button" data-tn="sleep" aria-pressed="true">Sleep</button><button type="button" data-tn="all" aria-pressed="false">All-nighter</button></div></div>
+    <div class="row" id="bed-r"><label for="bed">Bedtime</label><input id="bed" type="time" value="23:30" step="300"></div>
+    <div class="row" id="alarm-r"><label for="alarm">Alarm</label><input id="alarm" type="time" value="07:00" step="300"></div>
+    <div class="row"><label for="exam">Exam or big thing tomorrow at</label>
+      <div class="exam"><input id="exam" type="time" value="09:00" step="300"><label class="check"><input id="noexam" type="checkbox"> none</label></div></div>
+    <div class="row"><span class="lbl" id="dr-l">Driving tomorrow?</span>
+      <div class="seg" role="group" aria-labelledby="dr-l"><button type="button" data-dr="yes" aria-pressed="false">Yes</button><button type="button" data-dr="no" aria-pressed="true">No</button></div></div>
+  </section>
+
+  <section class="card result" aria-live="polite" aria-labelledby="res-h">
+    <span class="k">Your line tonight</span>
+    <h2 id="res-h"></h2>
+    <ul class="lines" id="lines"></ul>
+    <p class="warn" id="warn" hidden>Check your times: that's more than a day awake.</p>
+    <div class="btns" id="btns">
+      <button class="btn" id="copy" type="button">Copy my score</button>
+      <button class="btn ghost" id="share" type="button">Share the calculator</button>
+      <span class="copied" id="copied" role="status"></span>
+    </div>
+  </section>
+
+  <p class="note" id="note">tonight's sleep is tomorrow's memory.</p>
+
+  <section class="card sources" aria-labelledby="src-h">
+    <details id="src">
+      <summary id="src-h">Where these numbers come from</summary>
+      <ol>
+        <li id="s-wf">The 17–19 hours vs 0.05% blood alcohol, and the most alcohol given (about 0.1%): 39 people, some tests, not all. <a href="https://oem.bmj.com/content/57/10/649">Williamson &amp; Feyer, Occup Environ Med 2000</a></li>
+        <li id="s-yoo-a">Alarm center (amygdala) about 60% more reactive after one night without sleep, small brain-scan study: <a href="https://www.cell.com/fulltext/S0960-9822(07)01783-6">Yoo et al., Current Biology 2007</a> · <a href="https://newsarchive.berkeley.edu/news/media/releases/2007/10/22_sleeploss.shtml">UC Berkeley</a></li>
+        <li id="s-yoo-m">New memories saved up to 40% worse after one night without sleep: <a href="https://www.nature.com/articles/nn1851">Yoo et al., Nature Neuroscience 2007</a> · <a href="https://news.harvard.edu/gazette/story/2007/02/study-shows-importance-of-sleep-for-optimal-memory-functioning/">Harvard Gazette</a></li>
+        <li id="s-kit">About 1 hour of sleep debt took 4 days to recover, 15 young men in a lab: <a href="https://www.nature.com/articles/srep35812">Kitamura et al., Scientific Reports 2016</a></li>
+        <li id="s-dep">Sleeping in on the weekend didn't undo short nights' effects on metabolism: <a href="https://doi.org/10.1016/j.cub.2019.01.069">Depner et al., Current Biology 2019</a></li>
+        <li id="s-aaa">Drivers who slept 4–5 hours: about 4× (4.3×) the crash rate of drivers who slept 7 or more: <a href="https://aaafoundation.org/research/acute-sleep-deprivation-risk-motor-vehicle-crash-involvement/">AAA Foundation for Traffic Safety 2016</a></li>
+        <li id="s-spi">Hunger up 24% after two short nights, 12 young men: <a href="https://pubmed.ncbi.nlm.nih.gov/15583226/">Spiegel et al., Annals of Internal Medicine 2004</a></li>
+        <li id="s-aasm">Adults 18–60: 7 or more hours a night: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4434546/">Watson et al., AASM + Sleep Research Society consensus, 2015</a></li>
+      </ol>
+      <p class="small" style="margin-top:10px">Hours awake at your exam are plain arithmetic from the times you typed.</p>
+    </details>
+  </section>
+
+  <footer>
+    <p class="disc">For learning, not medical advice. Studies are averages, and you aren't one. Sleepy behind the wheel? Pull over.</p>
+    <nav aria-label="More from HeyRhino">
+      <!-- "Watch the trip" goes here the day the all-nighter video is public (URL from the upload). -->
+      <a href="../notes/all-nighter/">Rhino's notes</a>
+      <a href="../clock/">Caffeine clock</a>
+      <a href="../">Rhino's Lab</a>
+    </nav>
+    <span>Made by HeyRhino · @heyrhinotv on YouTube, Instagram and TikTok · welcome to the crash</span>
+    <span>© 2026 HeyRhino · no sign-up, no cookies, no tracking</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const DAY=1440, H=60;
+  const SRC={wf:'Williamson & Feyer 2000',yooA:'Yoo 2007',yooM:'Yoo 2007',kit:'Kitamura 2016',dep:'Depner 2019',aaa:'AAA 2016',spi:'Spiegel 2004',aasm:'AASM 2015'};
+  const ID={wf:'s-wf',yooA:'s-yoo-a',yooM:'s-yoo-m',kit:'s-kit',dep:'s-dep',aaa:'s-aaa',spi:'s-spi',aasm:'s-aasm'};
+  let S={wake:'07:00',all:false,bed:'23:30',alarm:'07:00',exam:'09:00',noExam:false,drive:false};
+  try{const s=JSON.parse(localStorage.getItem('rhino-sleep')||'null');if(s&&typeof s==='object')S=Object.assign(S,s);}catch(e){}
+  const save=()=>{try{localStorage.setItem('rhino-sleep',JSON.stringify(S));}catch(e){}};
+
+  const toMin=v=>{const m=/^(\d{1,2}):(\d{2})/.exec(v||'');return m?(+m[1])*60+(+m[2]):null;};
+  const mod=(a,n)=>((a%n)+n)%n;
+  // "12:00 AM" (headline) and "9 AM" / "9:30 AM" (copy line)
+  const fmt=t=>{t=mod(Math.round(t),DAY);const h=Math.floor(t/60),m=t%60,ap=h<12?'AM':'PM',h12=h%12===0?12:h%12;return h12+':'+String(m).padStart(2,'0')+' '+ap;};
+  const fmtS=t=>fmt(t).replace(':00 ',' ');
+  // hours: one decimal only when it isn't whole ("5.5", "7")
+  const hrs=min=>{const v=Math.round(min/6)/10;return Number.isInteger(v)?String(v):v.toFixed(1);};
+  const tag=k=>`<a class="tag" href="#${ID[k]}" data-src>${SRC[k]}</a>`;
+
+  function calc(){
+    const wake=toMin(S.wake);
+    if(wake===null) return null;
+    const R={wake,all:S.all,drive:S.drive};
+    R.buzzLine=wake+17*H;                                   // ledger #3: the 17–19 h window starts here
+    if(!S.all){
+      const b=toMin(S.bed), a=toMin(S.alarm); if(b===null||a===null) return null;
+      // bedtime: next time that clock reading comes round after you woke up. Under 3 h after waking is read as the
+      // following day (nobody goes to bed 1 h after getting up), so 8 AM after a 7 AM wake-up is 25 h: "check your times".
+      let d=mod(b-wake,DAY); if(d<3*H) d+=DAY;
+      R.bed=wake+d;
+      let s=mod(a-R.bed,DAY); if(s===0) s=DAY;              // alarm rolled forward so alarm > bed
+      R.alarm=R.bed+s;
+      R.awakeAtBed=R.bed-wake;
+      R.slept=R.alarm-R.bed;
+      R.invalid=R.awakeAtBed>24*H;
+    } else { R.slept=0; R.awakeAtBed=null; R.invalid=false; }
+    R.short=Math.max(0,7*H-R.slept);                         // ledger #20: adults 7 h or more
+    R.crosses=S.all||R.awakeAtBed>=17*H;
+    if(!S.noExam){
+      const e=toMin(S.exam);
+      if(e!==null){
+        if(S.all){ R.exam=DAY+e; if(R.exam<=wake) R.exam+=DAY; R.awakeAtExam=R.exam-wake; }      // tomorrow, measured from this morning's wake-up
+        else { R.exam=R.alarm+mod(e-R.alarm,DAY); R.awakeAtExam=R.exam-R.alarm; }              // first time it comes round after the alarm
+      }
+    }
+    return R;
+  }
+
+  let scoreLine='';
+  function render(){
+    // controls
+    $('wake').value=S.wake; $('bed').value=S.bed; $('alarm').value=S.alarm; $('exam').value=S.exam;
+    $('noexam').checked=S.noExam; $('exam').disabled=S.noExam;
+    $('bed-r').hidden=S.all; $('alarm-r').hidden=S.all;
+    document.querySelectorAll('[data-tn]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.tn==='all')===S.all)));
+    document.querySelectorAll('[data-dr]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.dr==='yes')===S.drive)));
+
+    const R=calc();
+    const bad=!R||R.invalid;
+    $('warn').hidden=!bad; $('lines').hidden=bad; $('btns').hidden=bad; $('res-h').hidden=bad;
+    if(bad){ scoreLine=''; save(); return; }
+
+    const buzz=fmt(R.buzzLine);
+    let head;
+    if(R.all) head=`basically <span class="hl">buzzed</span> by ${buzz}.`;
+    else if(R.crosses) head=`over the <span class="hl">line</span> at ${buzz}.`;
+    else if(R.slept>=7*H) head=`under the <span class="hl">line</span>. nice.`;
+    else head=`${hrs(R.short)} h <span class="hl">short</span> tonight.`;
+    $('res-h').innerHTML=head;
+
+    const L=[];
+    if(R.crosses) L.push(`You hit 17 hours awake at <b>${buzz}</b>. From 17 to 19 hours, people in one study scored as badly as, or worse than, at a <b class="risk">0.05%</b> blood alcohol level on some tests.${tag('wf')}`);
+    if(R.all||R.awakeAtBed>19*H) L.push(`Keep going and it gets worse: later in that study, scores reached the level of the most alcohol anyone was given.${tag('wf')}`);
+    if(!R.crosses) L.push(`You're in bed before the 17-hour line (that'd be <b>${buzz}</b>).${tag('wf')}`);
+    if(!R.all) L.push(`Sleep tonight: <b>${hrs(R.slept)} h</b>. `+(R.short===0?`That's 7 or more, the minimum for adults.`:`That's <b class="risk">${hrs(R.short)} h</b> under the 7-hour minimum for adults.`)+tag('aasm'));
+    if(R.all) L.push(`One night without sleep: in one study, people saved new memories up to <b class="risk">40%</b> worse.${tag('yooM')}`);
+    if(R.all) L.push(`And your alarm center: about <b class="risk">60%</b> more reactive to bad news in one small brain-scan study.${tag('yooA')}`);
+    if(R.short>0||R.all) L.push(`Paying it back: in one lab study of 15 young men, being about <b>1 hour</b> short took <b>4 days</b> of extra sleep to get back to their best. Sleeping in on the weekend didn't undo it in another study.${tag('kit')}${tag('dep')}`);
+    if(R.awakeAtExam!=null) L.push(`At your <b>${fmt(R.exam)}</b> exam, you'll have been awake <b>${hrs(R.awakeAtExam)} h</b>.`);
+    if(R.drive&&!R.all&&R.slept>=4*H&&R.slept<=5*H) L.push(`Driving: people who slept 4 to 5 hours had about <b class="risk">4×</b> the crash rate of people who slept 7 or more.${tag('aaa')}`);
+    if(R.drive&&(R.all||R.slept<4*H)) L.push(`Driving: that's less sleep than the 4-to-5-hour group, which already had about <b class="risk">4×</b> the crash rate. Get a ride.${tag('aaa')}`);
+    if(R.all||R.slept<=5*H) L.push(`Tomorrow's snacks: after two short nights, hunger went up <b>24%</b> in one small study of 12 young men.${tag('spi')}`);
+    $('lines').innerHTML=L.map(x=>'<li>'+x+'</li>').join('');
+    $('lines').querySelectorAll('[data-src]').forEach(a=>a.addEventListener('click',()=>{$('src').open=true;}));
+
+    $('note').textContent=R.all?'sleep is when the studying gets saved.':"tonight's sleep is tomorrow's memory.";
+
+    // the one line people paste into comments (no link on purpose: comments with links get held)
+    if(R.all) scoreLine=`Rhino's sleep debt calculator: all-nighter, basically buzzed by ${buzz}`+(R.awakeAtExam!=null?`, ${hrs(R.awakeAtExam)} h awake at my ${fmtS(R.exam)} exam`:'')+' 🦏';
+    else if(R.crosses) scoreLine=`Rhino's sleep debt calculator: over the line at ${buzz}, ${hrs(R.slept)} h of sleep tonight 🦏`;
+    else scoreLine=`Rhino's sleep debt calculator: ${hrs(R.slept)} h tonight, `+(R.short>0?`${hrs(R.short)} h under 7`:'under the line')+' 🦏';
+    save();
+  }
+
+  // inputs: everything recalculates live
+  ['wake','bed','alarm','exam'].forEach(k=>$(k).addEventListener('input',e=>{if(e.target.value){S[k]=e.target.value;render();}}));
+  $('noexam').addEventListener('change',e=>{S.noExam=e.target.checked;render();});
+  document.querySelectorAll('[data-tn]').forEach(b=>b.addEventListener('click',()=>{S.all=b.dataset.tn==='all';render();}));
+  document.querySelectorAll('[data-dr]').forEach(b=>b.addEventListener('click',()=>{S.drive=b.dataset.dr==='yes';render();}));
+
+  // copy: Clipboard API, then the textarea fallback (same as the caffeine clock)
+  async function copyText(text){
+    try{await navigator.clipboard.writeText(text);return true;}
+    catch(e){const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+      let ok=false;try{ok=document.execCommand('copy');}catch(_){} ta.remove();return ok;}
+  }
+  function say(msg,fallback){const out=$('copied');out.textContent=msg||fallback;clearTimeout(out._t);out._t=setTimeout(()=>{out.textContent='';},msg?3000:8000);}
+  $('copy').addEventListener('click',async()=>{const ok=await copyText(scoreLine);say(ok?'Copied. Paste it in the comments 🦏':'',scoreLine);});
+  const SHARE='How buzzed is your all-nighter? Find your line: https://heyrhinotv.github.io/sleep/';
+  $('share').addEventListener('click',async()=>{
+    if(navigator.share){try{await navigator.share({text:SHARE});return;}catch(e){if(e&&e.name==='AbortError')return;}}
+    const ok=await copyText(SHARE);say(ok?'Link copied 🦏':'',SHARE);
+  });
+
+  render();
+})();
+</script>
+</html>
