@@ -70,6 +70,11 @@ input[type=time]:disabled{opacity:.45}
 .btn{font:700 14px var(--f-display);min-height:44px;border:2px solid var(--ink);background:var(--yellow);color:#0B0B0F;border-radius:999px;padding:8px 18px;cursor:pointer;box-shadow:3px 4px 0 var(--ink)}
 .btn.ghost{background:transparent;color:#fff;border-color:#fff;box-shadow:none}
 .copied{font:700 13px var(--f-body);color:var(--yellow)}
+/* body receipt preview: the long-press / right-click fallback when a browser ignores the download */
+.rcpt{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.rcpt[hidden]{display:none}
+.rcpt img{width:min(240px,100%);height:auto;border:3px solid var(--ink);border-radius:12px;display:block;-webkit-touch-callout:default}
+.rcpt p{font-size:13px;color:#DCE3FA}
 button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--yellow);outline-offset:2px}
 .card:not(.result) button:focus-visible,.card:not(.result) input:focus-visible,.card:not(.result) a:focus-visible,summary:focus-visible,footer a:focus-visible{outline-color:var(--cobalt)}
 .note{font-family:var(--f-note);font-size:21px;color:var(--cobalt);text-align:center;transform:rotate(-1.5deg)}
@@ -112,9 +117,11 @@ footer nav a{color:var(--cobalt);display:inline-flex;align-items:center;min-heig
     <p class="warn" id="warn" hidden>Check your times: that's more than a day awake.</p>
     <div class="btns" id="btns">
       <button class="btn" id="copy" type="button">Copy my score</button>
+      <button class="btn ghost" id="receipt" type="button">Download my body receipt</button>
       <button class="btn ghost" id="share" type="button">Share the calculator</button>
       <span class="copied" id="copied" role="status"></span>
     </div>
+    <div class="rcpt" id="rcpt" hidden><img id="rcpt-img" alt="Your body receipt: your sleep debt for the week" width="1080" height="1920"><p id="rcpt-hint"></p></div>
   </section>
 
   <p class="note" id="note">tonight's sleep is tomorrow's memory.</p>
@@ -149,6 +156,7 @@ footer nav a{color:var(--cobalt);display:inline-flex;align-items:center;min-heig
   </footer>
 </div>
 
+<script src="../receipt.js"></script>
 <script>
 (function(){
   const $=id=>document.getElementById(id);
@@ -199,6 +207,7 @@ footer nav a{color:var(--cobalt);display:inline-flex;align-items:center;min-heig
 
   let scoreLine='';
   function render(){
+    $('rcpt').hidden=true; // a receipt preview from older numbers would mislead
     // controls
     $('wake').value=S.wake; $('bed').value=S.bed; $('alarm').value=S.alarm; $('exam').value=S.exam;
     $('noexam').checked=S.noExam; $('exam').disabled=S.noExam;
@@ -209,7 +218,7 @@ footer nav a{color:var(--cobalt);display:inline-flex;align-items:center;min-heig
     const R=calc();
     const bad=!R||R.invalid;
     $('warn').hidden=!bad; $('lines').hidden=bad; $('btns').hidden=bad; $('res-h').hidden=bad;
-    if(bad){ scoreLine=''; save(); return; }
+    if(bad){ scoreLine=''; $('rcpt').hidden=true; save(); return; }
 
     const buzz=fmt(R.buzzLine);
     let head;
@@ -262,6 +271,25 @@ footer nav a{color:var(--cobalt);display:inline-flex;align-items:center;min-heig
     if(navigator.share){try{await navigator.share({text:SHARE});return;}catch(e){if(e&&e.name==='AbortError')return;}}
     const ok=await copyText(SHARE);say(ok?'Link copied 🦏':'',SHARE);
   });
+
+  // body receipt: tonight's numbers plus the 7-day debt if every night looks like tonight (plain arithmetic), drawn in the browser (receipt.js)
+  if(window.RhinoReceipt) RhinoReceipt.attach({button:$('receipt'),preview:$('rcpt'),img:$('rcpt-img'),hint:$('rcpt-hint'),filename:'rhino-body-receipt-sleep.png',getSpec(){
+    const R=calc(); if(!R||R.invalid) return null;
+    const buzz=fmt(R.buzzLine), lines=[['Woke up',fmt(R.wake)]];
+    let week,sub;
+    if(R.all){
+      lines.push(['Tonight','all-nighter'],['Sleep tonight','0 h'],['17 hours awake at',buzz]);
+      week=7*H; sub='One all-nighter is 7 h under the 7-hour minimum, even if the other six nights hit it.';
+    } else {
+      lines.push(['Bedtime',fmt(R.bed)],['Alarm',fmt(R.alarm)],['Sleep tonight',hrs(R.slept)+' h'],[R.crosses?'Over the 17-hour line at':'17-hour line at',buzz]);
+      week=R.short*7;
+      sub=R.short>0?`If every night this week looks like tonight: ${hrs(R.short)} h under the 7-hour minimum, 7 nights in a row.`:'Tonight hits the 7-hour minimum for adults. Keep that up and the week owes nothing.';
+    }
+    if(R.awakeAtExam!=null) lines.push([`Awake at your ${fmtS(R.exam)} exam`,hrs(R.awakeAtExam)+' h']);
+    return {kicker:'Sleep debt calculator',lines,totalLabel:'Your 7-day sleep debt',big:hrs(week),unit:'h',sub,meter:null,
+      note:R.all?'sleep is when the studying gets saved.':"tonight's sleep is tomorrow's memory.",
+      fine:week>0?'Paying it back is slow: in one lab study, about 1 hour short took 4 days of extra sleep to recover (Kitamura et al. 2016).':''};
+  }});
 
   render();
 })();

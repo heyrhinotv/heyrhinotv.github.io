@@ -65,6 +65,12 @@ p{margin:0}
 .copyrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px}.copyrow .btn{min-height:44px}.copied{font:700 13px var(--f-body,inherit)}
 .btn{font:700 14px var(--f-display);border:2px solid var(--ink);background:var(--yellow);color:#0B0B0F;border-radius:999px;padding:8px 16px;cursor:pointer;box-shadow:3px 4px 0 var(--ink);align-self:flex-start}
 .btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn.ghost{background:transparent;color:#fff;border-color:#fff;box-shadow:none}
+/* body receipt preview: the long-press / right-click fallback when a browser ignores the download */
+.rcpt{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-top:4px}
+.rcpt[hidden]{display:none}
+.rcpt img{width:min(240px,100%);height:auto;border:3px solid var(--ink);border-radius:12px;display:block;-webkit-touch-callout:default}
+.rcpt p{font-size:13px;color:#DCE3FA}
 .link{font:600 13px var(--f-body);background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;padding:4px}
 button:focus-visible,input:focus-visible,summary:focus-visible,a:focus-visible{outline:3px solid var(--cobalt);outline-offset:2px}
 .small{font-size:13px;color:var(--muted)}
@@ -101,7 +107,8 @@ footer{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:
     <div class="big"><span class="n" id="left">50</span><span class="u">mg at <span id="bedlbl">1:00 am</span></span></div>
     <div class="meter" aria-hidden="true"><i id="meter" style="width:25%"></i></div>
     <p class="s" id="summary">That's 25% of the 200 mg you drank.</p>
-    <div class="copyrow"><button class="btn" id="copy" type="button">Copy my 1 AM score</button><span class="copied" id="copied" role="status"></span></div>
+    <div class="copyrow"><button class="btn" id="copy" type="button">Copy my 1 AM score</button><button class="btn ghost" id="receipt" type="button">Download my body receipt</button><span class="copied" id="copied" role="status"></span></div>
+    <div class="rcpt" id="rcpt" hidden><img id="rcpt-img" alt="Your body receipt: the caffeine still in you at bedtime" width="1080" height="1920"><p id="rcpt-hint"></p></div>
   </section>
 
   <section class="card" aria-labelledby="in-h">
@@ -147,6 +154,7 @@ footer{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:
   </footer>
 </div>
 
+<script src="../receipt.js"></script>
 <script>
 (function(){
   const $=id=>document.getElementById(id);
@@ -248,6 +256,7 @@ footer{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:
   }
 
   function update(){
+    $('rcpt').hidden=true; // a receipt preview from older numbers would mislead
     $('bed-o').value=fmt(S.bed); $('hl-o').value=S.hl+' h';
     const total=drinks.reduce((s,d)=>s+d.mg,0);
     const before=drinks.filter(d=>d.t<=S.bed), drank=before.reduce((s,d)=>s+d.mg,0);
@@ -275,6 +284,15 @@ footer{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:
     $('rule').innerHTML=notes.map(n=>'<span>'+n+'</span>').join('');
     drawChart(); save();
   }
+  // body receipt: the same numbers as the result card, drawn on a canvas in the browser (receipt.js)
+  if(window.RhinoReceipt) RhinoReceipt.attach({button:$('receipt'),preview:$('rcpt'),img:$('rcpt-img'),hint:$('rcpt-hint'),filename:'rhino-body-receipt-caffeine.png',getSpec(){
+    const before=drinks.filter(d=>d.t<=S.bed), drank=before.reduce((s,d)=>s+d.mg,0), left=level(S.bed);
+    const lines=drinks.map((d,i)=>[`Drink ${i+1} at ${fmt(d.t)}`+(d.t>S.bed?' (after bed)':''),d.mg+' mg']);
+    lines.push(['Bedtime',fmt(S.bed)],['Your half-life',S.hl+' h'],['Drank before bed',drank+' mg']);
+    return {kicker:'Caffeine clock',lines,totalLabel:'Still in you at '+fmt(S.bed),big:String(Math.round(left)),unit:'mg',
+      sub:drank?`That's ${Math.round(left/drank*100)}% of the ${drank} mg you drank, still working when you lie down.`:'No drinks before bedtime.',
+      meter:drank?left/drank:0,note:"it's not energy. it's a loan."};
+  }});
   let rz; window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(drawChart,120);});
   syncHl(); renderDrinks(); update();
 })();

@@ -5,7 +5,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Rhino's Lab</title>
-<meta name="description" content="Your body is a city. HeyRhino shrinks down and gives the tour. Every trip leaves a free tool and a one-page cheat sheet here. First district open: the energy drink.">
+<meta name="description" content="Your body is a city. HeyRhino shrinks down and gives the tour. Every trip leaves a free tool and a one-page cheat sheet here.">
 <meta name="theme-color" content="#0A1A5C">
 <link rel="icon" href="clock/img/avatar.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,8 @@
 <style>
 /* Rhino's Lab: the public hub. Phone-first single column (people arrive from a YouTube description or a bio link):
    header → the Body City map (tap a district) → one card per district → footer.
-   District 1 is open (clock + notes). Districts 2–4 are "next trip": name, one-line tease, no tools yet. */
+   Each district is LOCKED · NEXT TRIP (navy silhouette) or OPEN (cobalt + yellow glow, calculator + notes buttons).
+   The state lives in one list, districts.js; the script at the bottom applies it to the map and the cards. */
 :root{
   --cobalt:#1F4FD8; --yellow:#FFD60A; --sunflower:#FFC400; --navy:#0A1A5C; --ink:#0B0B0F; --paper:#F3F1EC; --white:#FFFFFF;
   --link:#1F4FD8; --coral:#FF6B5B; --money:#22C55E; --gray:#B4BAC6; --muted:#4A4E5C; --line:#DEDBD3; --card:#FFFFFF;
@@ -60,23 +61,36 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
   .puff:nth-child(3){animation-delay:2.6s}
   @keyframes puff{0%{transform:translateY(0);opacity:0}20%{opacity:.9}100%{transform:translateY(-22px);opacity:0}}
 }
-/* district cards */
-.districts{display:grid;grid-template-columns:1fr;gap:14px}
-.d{background:var(--card);border:2px solid var(--line);border-radius:16px;overflow:hidden}
-.d[open]{border-color:var(--ink)}
-.d.open{border:3px solid var(--ink)}
-.d summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--cobalt);color:#fff;min-height:56px}
-.d summary::-webkit-details-marker{display:none}
-.d.locked summary{background:var(--dim);color:#DCE3FA}
+/* district cards: LOCKED · NEXT TRIP (navy silhouette) or OPEN (cobalt + yellow glow). No-JS default: locked. */
+.districts{display:grid;grid-template-columns:1fr;gap:16px}
+.d{border-radius:16px;overflow:hidden;scroll-margin-top:16px}
+.d .dh{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px 14px;min-height:56px}
+.d .dh > span:nth-child(2){flex:1 1 170px;min-width:0}
+.d .dh b{font:800 17px/1.1 var(--f-head);text-transform:lowercase}
+.d .dh small{display:block;font:500 12.5px/1.2 var(--f-body);opacity:.85;margin-top:2px}
 .ring{flex:none;width:32px;height:32px;border-radius:50%;border:5px solid var(--yellow);box-shadow:0 0 0 2px #0B0B0F,inset 0 0 0 2px #0B0B0F;display:grid;place-items:center;font:800 13px/1 var(--f-head);color:#fff;background:var(--navy)}
-.d.locked .ring{border-color:#8A93B8;color:#DCE3FA}
-.d summary b{font:800 17px/1.1 var(--f-head);text-transform:lowercase}
-.d summary small{display:block;font:500 12.5px/1.2 var(--f-body);opacity:.85;margin-top:2px;text-transform:none}
-.badge{margin-left:auto;flex:none;font:700 12px/1 var(--f-head);background:var(--yellow);color:#0B0B0F;border:2px solid #0B0B0F;border-radius:999px;padding:5px 10px;white-space:nowrap}
-.d.locked .badge{background:#0B0B0F;color:#DCE3FA;border-color:#2B3C8F}
-.d .body{padding:14px 14px 16px;display:flex;flex-direction:column;gap:10px}
-.d .body p{font-size:15px}
-.d .body .muted{color:var(--muted);font-size:14px}
+.badge{margin-left:auto;flex:none;font:700 12px/1 var(--f-head);background:var(--yellow);color:#0B0B0F;border:2px solid #0B0B0F;border-radius:999px;padding:5px 10px;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+.d .body{padding:14px 14px 16px;display:grid;grid-template-columns:88px 1fr;gap:12px 14px;align-items:start}
+.d .art{width:88px;height:88px;display:block;border-radius:12px;border:2px solid #0B0B0F}
+.d .txt{display:flex;flex-direction:column;gap:8px;min-width:0}
+.d .txt p{font-size:15px}
+.d .acts{grid-column:1/-1;display:flex;flex-direction:column;gap:10px}
+.when{align-self:flex-start;font:700 13px/1 var(--f-head);background:#0B0B0F;color:var(--yellow);border:2px solid var(--dimline);border-radius:999px;padding:7px 11px}
+.d.is-locked{background:var(--dim2);border:2px solid var(--dimline);color:#DCE3FA}
+.d.is-locked .dh{background:var(--dim)}
+.d.is-locked .ring{border-color:#8A93B8;color:#DCE3FA}
+.d.is-locked .badge{background:#0B0B0F;color:#DCE3FA;border-color:var(--dimline)}
+.d.is-locked .art{background:var(--navy)}
+.d.is-locked .muted{color:#AEB4C6}
+.d.is-locked .s-open,.d.is-open .s-locked{display:none}
+.d.is-open{background:var(--card);border:3px solid var(--ink);box-shadow:0 0 0 4px var(--yellow),0 0 34px 6px rgba(255,214,10,.42)}
+.d.is-open .dh{background:var(--cobalt);color:#fff}
+.d.is-open .art{background:radial-gradient(circle at 50% 58%,rgba(255,214,10,.6),rgba(255,214,10,0) 68%),var(--navy)}
+.d:target{outline:3px dashed var(--yellow);outline-offset:6px}
+.acts .row .btn{flex:1 1 auto}
+.tlink{font:600 14px var(--f-body);color:var(--link);min-height:44px;display:inline-flex;align-items:center}
+/* the map follows the same state */
+.dist.is-locked .glow,.dist.is-locked .puffs,.dist.is-open .lock{display:none}
 .tools{display:grid;grid-template-columns:1fr;gap:10px;margin-top:4px}
 .tool{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);background:var(--paper);border:2px solid var(--ink);border-radius:14px;padding:12px 14px;min-height:64px;box-shadow:3px 4px 0 #0B0B0F}
 .tool:active{transform:translate(2px,2px);box-shadow:1px 2px 0 #0B0B0F}
@@ -99,7 +113,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
   .top > div{padding-right:112px}
   .top .label{padding-right:0}
   .districts{grid-template-columns:1fr 1fr}
-  .d.open{grid-column:1/-1}
+  .d.is-open{grid-column:1/-1}
   .tools{grid-template-columns:1fr 1fr}
 }
 </style>
@@ -117,11 +131,14 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
   <section class="city" aria-label="The Body City map">
     <svg viewBox="0 0 720 300" role="img" aria-labelledby="mapT mapD">
       <title id="mapT">The Body City: four districts</title>
-      <desc id="mapD">A night skyline. The energy drink district is lit, with a glowing yellow ring on the processing plant. Three dark districts are coming next: the all-nighter, out cold, and the first workout.</desc>
+      <desc id="mapD">A night skyline of four districts: the energy drink, the all-nighter, out cold and the first workout. Open districts are lit in color with a glowing yellow ring; locked ones are dark navy silhouettes with a padlock.</desc>
       <defs>
         <radialGradient id="g1" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFD60A" stop-opacity=".55"/><stop offset="1" stop-color="#FFD60A" stop-opacity="0"/></radialGradient>
         <pattern id="win" width="14" height="16" patternUnits="userSpaceOnUse"><rect x="3" y="3" width="7" height="9" fill="#FFD60A"/></pattern>
-        <pattern id="winD" width="14" height="16" patternUnits="userSpaceOnUse"><rect x="3" y="3" width="7" height="9" fill="#24379A"/></pattern>
+        <pattern id="winC" width="14" height="16" patternUnits="userSpaceOnUse"><rect x="3" y="3" width="7" height="9" fill="#1F4FD8"/></pattern>
+        <!-- locked: every color mapped to a shade of navy by its brightness (a silhouette that keeps the building's shape) -->
+        <filter id="sil" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="0.0234 0.0787 0.0079 0 0.06  0.0276 0.0930 0.0094 0 0.10  0.0446 0.1502 0.0152 0 0.30  0 0 0 1 0"/></filter>
+        <g id="padlock"><rect width="28" height="28" rx="6" fill="#0B0B0F" stroke="#8A93B8" stroke-width="2"/><rect x="8" y="12" width="12" height="9" rx="1.5" fill="#8A93B8"/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#8A93B8" stroke-width="2.5"/></g>
       </defs>
       <!-- sky -->
       <rect width="720" height="300" fill="#0A1A5C"/>
@@ -136,131 +153,133 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
       <rect x="0" y="250" width="720" height="50" fill="#0E2A8C"/>
       <rect x="0" y="262" width="720" height="22" fill="#24379A"/>
       <path d="M118 273 C 200 273, 230 273, 300 273 S 460 273, 640 273" fill="none" stroke="#FFD60A" stroke-width="4" stroke-dasharray="10 9" stroke-linecap="round" opacity=".9"/>
-      <path d="M118 273 L 150 273" fill="none" stroke="#FFD60A" stroke-width="4" stroke-linecap="round"/>
 
-      <!-- District 1: the energy drink (the processing plant), lit -->
-      <a href="#d1" aria-label="District 1, the energy drink: open">
-        <g>
-          <circle class="glow" cx="118" cy="168" r="70" fill="url(#g1)"/>
-          <g class="puffs" fill="#DCE3FA" opacity=".85">
-            <circle class="puff" cx="176" cy="96" r="6"/><circle class="puff" cx="182" cy="92" r="7"/><circle class="puff" cx="172" cy="90" r="5"/>
-          </g>
+      <!-- District 1: the energy drink (the processing plant) -->
+      <a href="#d1" class="dist is-locked" data-d="d1" aria-label="District 1, the energy drink: locked, next trip">
+        <circle class="glow" cx="118" cy="168" r="74" fill="url(#g1)"/>
+        <g class="puffs" fill="#DCE3FA" opacity=".85"><circle class="puff" cx="176" cy="96" r="6"/><circle class="puff" cx="182" cy="92" r="7"/><circle class="puff" cx="172" cy="90" r="5"/></g>
+        <g id="bld-d1" filter="url(#sil)">
           <rect x="166" y="100" width="18" height="60" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="3"/>
           <path d="M40 160 L70 130 L100 160 L130 130 L160 160 L190 130 L190 250 L40 250 Z" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="3" stroke-linejoin="round"/>
           <rect x="48" y="170" width="140" height="70" fill="url(#win)" opacity=".9"/>
           <rect x="40" y="160" width="150" height="90" fill="none" stroke="#0B0B0F" stroke-width="3"/>
           <rect x="105" y="214" width="26" height="36" fill="#0B0B0F"/>
-          <!-- the yellow ring portal on the front wall -->
           <circle cx="118" cy="186" r="30" fill="#0A1A5C" stroke="#0B0B0F" stroke-width="3"/>
           <circle cx="118" cy="186" r="26" fill="none" stroke="#FFD60A" stroke-width="7"/>
           <circle cx="118" cy="186" r="29.5" fill="none" stroke="#0B0B0F" stroke-width="2"/>
           <circle cx="118" cy="186" r="22.5" fill="none" stroke="#0B0B0F" stroke-width="2"/>
-          <!-- the can on the roof sign -->
           <rect x="60" y="106" width="22" height="34" rx="4" fill="#1F4FD8" stroke="#0B0B0F" stroke-width="3"/>
           <rect x="60" y="116" width="22" height="8" fill="#FFD60A"/>
           <line x1="71" y1="140" x2="71" y2="150" stroke="#0B0B0F" stroke-width="3"/>
-          <rect class="hit" x="34" y="84" width="162" height="172" rx="10"/>
         </g>
+        <use class="lock" href="#padlock" x="104" y="172"/>
+        <rect class="hit" x="34" y="84" width="162" height="172" rx="10"/>
       </a>
 
-      <!-- District 2: the all-nighter (the port, brain dome), dark -->
-      <a href="#d2" aria-label="District 2, the all-nighter: next trip">
-        <g>
-          <rect x="250" y="150" width="90" height="100" fill="#16267A" stroke="#2B3C8F" stroke-width="3"/>
-          <rect x="258" y="160" width="74" height="84" fill="url(#winD)"/>
-          <path d="M262 150 A33 33 0 0 1 328 150 Z" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3"/>
-          <path d="M275 140 q6 -10 12 0 q6 -10 12 0 q6 -10 12 0" fill="none" stroke="#2B3C8F" stroke-width="3" stroke-linecap="round"/>
-          <rect x="300" y="100" width="6" height="52" fill="#2B3C8F"/>
-          <circle cx="303" cy="98" r="5" fill="#0F1C5C" stroke="#2B3C8F" stroke-width="3"/>
-          <g transform="translate(281 176)"><rect width="28" height="28" rx="6" fill="#0B0B0F" stroke="#8A93B8" stroke-width="2"/><rect x="8" y="12" width="12" height="9" rx="1.5" fill="#8A93B8"/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#8A93B8" stroke-width="2.5"/></g>
-          <rect class="hit" x="244" y="90" width="102" height="166" rx="10"/>
+      <!-- District 2: the all-nighter (the port with the brain dome) -->
+      <a href="#d2" class="dist is-locked" data-d="d2" aria-label="District 2, the all-nighter: locked, next trip">
+        <circle class="glow" cx="295" cy="176" r="70" fill="url(#g1)"/>
+        <g id="bld-d2" filter="url(#sil)">
+          <rect x="300" y="100" width="6" height="52" fill="#0B0B0F"/>
+          <circle cx="303" cy="98" r="6" fill="#FFD60A" stroke="#0B0B0F" stroke-width="3"/>
+          <path d="M262 150 A33 33 0 0 1 328 150 Z" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M275 140 q6 -10 12 0 q6 -10 12 0 q6 -10 12 0" fill="none" stroke="#0B0B0F" stroke-width="3" stroke-linecap="round"/>
+          <rect x="250" y="150" width="90" height="100" fill="#1F4FD8" stroke="#0B0B0F" stroke-width="3"/>
+          <rect x="258" y="160" width="74" height="84" fill="url(#win)" opacity=".9"/>
+          <rect x="282" y="216" width="26" height="34" fill="#0B0B0F"/>
         </g>
+        <use class="lock" href="#padlock" x="281" y="176"/>
+        <rect class="hit" x="244" y="90" width="102" height="166" rx="10"/>
       </a>
 
-      <!-- District 3: out cold (the clinic with the lamp), dark -->
-      <a href="#d3" aria-label="District 3, out cold: next trip">
-        <g>
-          <rect x="400" y="130" width="110" height="120" fill="#16267A" stroke="#2B3C8F" stroke-width="3"/>
-          <rect x="408" y="142" width="94" height="100" fill="url(#winD)"/>
-          <rect x="440" y="100" width="30" height="30" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3"/>
-          <rect x="451" y="106" width="8" height="18" fill="#2B3C8F"/><rect x="446" y="111" width="18" height="8" fill="#2B3C8F"/>
-          <path d="M470 118 h40 v-12 l-10 -8" fill="none" stroke="#2B3C8F" stroke-width="3" stroke-linecap="round"/>
-          <path d="M490 100 l12 10 l-24 0 z" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3" stroke-linejoin="round"/>
-          <g transform="translate(441 176)"><rect width="28" height="28" rx="6" fill="#0B0B0F" stroke="#8A93B8" stroke-width="2"/><rect x="8" y="12" width="12" height="9" rx="1.5" fill="#8A93B8"/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#8A93B8" stroke-width="2.5"/></g>
-          <rect class="hit" x="394" y="88" width="122" height="168" rx="10"/>
+      <!-- District 3: out cold (the clinic with the lamp) -->
+      <a href="#d3" class="dist is-locked" data-d="d3" aria-label="District 3, out cold: locked, next trip">
+        <circle class="glow" cx="455" cy="172" r="78" fill="url(#g1)"/>
+        <g id="bld-d3" filter="url(#sil)">
+          <rect x="400" y="130" width="110" height="120" fill="#F3F1EC" stroke="#0B0B0F" stroke-width="3"/>
+          <rect x="408" y="142" width="94" height="100" fill="url(#winC)"/>
+          <rect x="440" y="100" width="30" height="30" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="3"/>
+          <rect x="451" y="106" width="8" height="18" fill="#F3F1EC"/><rect x="446" y="111" width="18" height="8" fill="#F3F1EC"/>
+          <path d="M470 118 h40 v-12 l-10 -8" fill="none" stroke="#0B0B0F" stroke-width="3" stroke-linecap="round"/>
+          <path d="M490 100 l12 10 l-24 0 z" fill="#FFD60A" stroke="#0B0B0F" stroke-width="3" stroke-linejoin="round"/>
+          <rect x="442" y="216" width="26" height="34" fill="#0B0B0F"/>
         </g>
+        <use class="lock" href="#padlock" x="441" y="176"/>
+        <rect class="hit" x="394" y="88" width="122" height="168" rx="10"/>
       </a>
 
-      <!-- District 4: the first workout (the gym block), dark -->
-      <a href="#d4" aria-label="District 4, the first workout: next trip">
-        <g>
-          <rect x="570" y="170" width="120" height="80" fill="#16267A" stroke="#2B3C8F" stroke-width="3"/>
-          <rect x="578" y="182" width="104" height="60" fill="url(#winD)"/>
-          <path d="M570 170 L630 136 L690 170 Z" fill="#1F2F7E" stroke="#2B3C8F" stroke-width="3" stroke-linejoin="round"/>
-          <g stroke="#2B3C8F" stroke-width="4" stroke-linecap="round"><line x1="604" y1="156" x2="656" y2="156"/><rect x="598" y="148" width="8" height="16" rx="2" fill="#1F2F7E"/><rect x="654" y="148" width="8" height="16" rx="2" fill="#1F2F7E"/></g>
-          <g transform="translate(616 196)"><rect width="28" height="28" rx="6" fill="#0B0B0F" stroke="#8A93B8" stroke-width="2"/><rect x="8" y="12" width="12" height="9" rx="1.5" fill="#8A93B8"/><path d="M10 12 v-3 a4 4 0 0 1 8 0 v3" fill="none" stroke="#8A93B8" stroke-width="2.5"/></g>
-          <rect class="hit" x="564" y="128" width="132" height="128" rx="10"/>
+      <!-- District 4: the first workout (the gym block) -->
+      <a href="#d4" class="dist is-locked" data-d="d4" aria-label="District 4, the first workout: locked, next trip">
+        <circle class="glow" cx="630" cy="196" r="72" fill="url(#g1)"/>
+        <g id="bld-d4" filter="url(#sil)">
+          <rect x="570" y="170" width="120" height="80" fill="#1F4FD8" stroke="#0B0B0F" stroke-width="3"/>
+          <rect x="578" y="182" width="104" height="60" fill="url(#win)" opacity=".9"/>
+          <path d="M570 170 L630 136 L690 170 Z" fill="#FF6B5B" stroke="#0B0B0F" stroke-width="3" stroke-linejoin="round"/>
+          <line x1="604" y1="156" x2="656" y2="156" stroke="#0B0B0F" stroke-width="4" stroke-linecap="round"/>
+          <rect x="598" y="148" width="8" height="16" rx="2" fill="#FFD60A" stroke="#0B0B0F" stroke-width="3"/>
+          <rect x="654" y="148" width="8" height="16" rx="2" fill="#FFD60A" stroke="#0B0B0F" stroke-width="3"/>
         </g>
+        <use class="lock" href="#padlock" x="616" y="196"/>
+        <rect class="hit" x="564" y="128" width="132" height="128" rx="10"/>
       </a>
     </svg>
-    <div class="hint">start here ↓</div>
+    <div class="hint" id="hint">first trips open Nov 20</div>
   </section>
 
   <section class="districts" aria-label="Districts">
-    <details class="d open" id="d1" open>
-      <summary><span class="ring">1</span><span><b>the energy drink</b><small>stomach · brain · heart · sleep · who profits</small></span><span class="badge">open</span></summary>
+    <article class="d is-locked" id="d1">
+      <div class="dh"><span class="ring">1</span><span><b>the energy drink</b><small>stomach · brain · heart · sleep · who profits</small></span><span class="badge">locked · next trip</span></div>
       <div class="body">
-        <p>One can, start to finish: what it does to your stomach, your brain, your heart and your sleep, and who makes money on every sip. Two things from the trip, free, no sign-up:</p>
-        <div class="tools">
-          <a class="tool" href="clock/">
-            <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#0A1A5C" stroke="#0B0B0F" stroke-width="2.5"/><circle cx="20" cy="20" r="14" fill="none" stroke="#FFD60A" stroke-width="4"/><line x1="20" y1="20" x2="20" y2="11" stroke="#fff" stroke-width="3" stroke-linecap="round"/><line x1="20" y1="20" x2="26" y2="24" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
-            <span><b>your caffeine clock</b><span>pick your can and your bedtime, see what's still in you</span></span>
-            <span class="go" aria-hidden="true">→</span>
-          </a>
-          <a class="tool" href="notes/">
-            <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="4" width="26" height="32" rx="3" fill="#F3F1EC" stroke="#0B0B0F" stroke-width="2.5"/><line x1="13" y1="13" x2="27" y2="13" stroke="#1F4FD8" stroke-width="3" stroke-linecap="round"/><line x1="13" y1="20" x2="27" y2="20" stroke="#0B0B0F" stroke-width="2.5" stroke-linecap="round"/><line x1="13" y1="27" x2="22" y2="27" stroke="#0B0B0F" stroke-width="2.5" stroke-linecap="round"/><rect x="24" y="24" width="10" height="8" rx="2" fill="#FFD60A" stroke="#0B0B0F" stroke-width="2"/></svg>
-            <span><b>rhino's notes</b><span>the one-page cheat sheet, every number sourced, print it</span></span>
-            <span class="go" aria-hidden="true">→</span>
-          </a>
+        <svg class="art" viewBox="28 80 172 176" aria-hidden="true" focusable="false"><use href="#bld-d1"/></svg>
+        <div class="txt">
+          <p>One can, start to finish: what it does to your stomach, your brain, your heart and your sleep, and who makes money on every sip.</p>
+          <span class="when s-locked" data-when>Opens Nov 20</span>
+          <p class="s-open">Two things from the trip, free, no sign-up:</p>
         </div>
-        <div class="row"><a class="btn" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a><span class="note">the whole tour, start to finish.</span></div>
-      </div>
-    </details>
-
-    <details class="d locked" id="d2">
-      <summary><span class="ring">2</span><span><b>the all-nighter</b><small>what staying up actually does to your brain</small></span><span class="badge">next trip</span></summary>
-      <div class="body">
-        <p>Hour by hour through a night with no sleep, from the first yawn to the 4 AM fog. The trip's coming; the tools are here now:</p>
-        <div class="tools">
-          <a class="tool" href="sleep/">
-            <svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="#0A1A5C" stroke="#0B0B0F" stroke-width="2.5"/><circle cx="20" cy="20" r="14" fill="none" stroke="#FFD60A" stroke-width="4"/><path d="M24 11 a9 9 0 1 0 6 15 a7 7 0 1 1 -6 -15 z" fill="#FFD60A"/></svg>
-            <span><b>your sleep debt calculator</b><span>when you cross the buzzed line tonight, and what it costs</span></span>
-            <span class="go" aria-hidden="true">→</span>
-          </a>
-          <a class="tool" href="notes/all-nighter/">
-            <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="4" width="26" height="32" rx="3" fill="#F3F1EC" stroke="#0B0B0F" stroke-width="2.5"/><line x1="13" y1="13" x2="27" y2="13" stroke="#1F4FD8" stroke-width="3" stroke-linecap="round"/><line x1="13" y1="20" x2="27" y2="20" stroke="#0B0B0F" stroke-width="2.5" stroke-linecap="round"/><line x1="13" y1="27" x2="22" y2="27" stroke="#0B0B0F" stroke-width="2.5" stroke-linecap="round"/><rect x="24" y="24" width="10" height="8" rx="2" fill="#FFD60A" stroke="#0B0B0F" stroke-width="2"/></svg>
-            <span><b>rhino's notes</b><span>the one-page all-nighter cheat sheet, every number sourced</span></span>
-            <span class="go" aria-hidden="true">→</span>
-          </a>
+        <div class="acts s-open">
+          <div class="row"><a class="btn" href="clock/">Open calculator</a><a class="btn ghost" href="notes/">Read Rhino's notes</a></div>
+          <div class="row"><a class="tlink" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a><span class="note">the whole tour, start to finish.</span></div>
         </div>
       </div>
-    </details>
+    </article>
 
-    <details class="d locked" id="d3">
-      <summary><span class="ring">3</span><span><b>out cold</b><small>what puts you under for surgery, and the bill</small></span><span class="badge">next trip</span></summary>
+    <article class="d is-locked" id="d2">
+      <div class="dh"><span class="ring">2</span><span><b>the all-nighter</b><small>what staying up actually does to your brain</small></span><span class="badge">locked · next trip</span></div>
       <div class="body">
-        <p>The surgeon's-eye view: what happens in the minutes between "count back from ten" and waking up, and who sends the invoice.</p>
-        <p class="muted">Tools on the way: the <b>out-cold timeline</b> and a <b>bill estimator</b> that shows where the money goes.</p>
+        <svg class="art" viewBox="225 82 140 174" aria-hidden="true" focusable="false"><use href="#bld-d2"/></svg>
+        <div class="txt">
+          <p>Hour by hour through a night with no sleep, from the first yawn to the 4 AM fog.</p>
+          <span class="when s-locked" data-when>Opens Nov 20</span>
+          <p class="s-open">Two things from the trip, free, no sign-up:</p>
+        </div>
+        <div class="acts s-open">
+          <div class="row"><a class="btn" href="sleep/">Open calculator</a><a class="btn ghost" href="notes/all-nighter/">Read Rhino's notes</a></div>
+          <div class="row"><a class="tlink" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a></div>
+        </div>
       </div>
-    </details>
+    </article>
 
-    <details class="d locked" id="d4">
-      <summary><span class="ring">4</span><span><b>the first workout</b><small>why day two hurts more than day one</small></span><span class="badge">next trip</span></summary>
+    <article class="d is-locked" id="d3">
+      <div class="dh"><span class="ring">3</span><span><b>out cold</b><small>what puts you under for surgery, and the bill</small></span><span class="badge">locked · next trip</span></div>
       <div class="body">
-        <p>Your first real workout in a while, from the inside: what tears, what rebuilds, and why the soreness shows up late.</p>
-        <p class="muted">Tool on the way: the <b>muscle clock</b>. When it'll hurt most, when it stops, and when to go again.</p>
+        <svg class="art" viewBox="385 84 150 172" aria-hidden="true" focusable="false"><use href="#bld-d3"/></svg>
+        <div class="txt">
+          <p>The surgeon's-eye view: what happens in the minutes between "count back from ten" and waking up, and who sends the invoice.</p>
+          <p class="muted">Tools on the way: the <b>out-cold timeline</b> and a <b>bill estimator</b> that shows where the money goes.</p>
+        </div>
       </div>
-    </details>
+    </article>
+
+    <article class="d is-locked" id="d4">
+      <div class="dh"><span class="ring">4</span><span><b>the first workout</b><small>why day two hurts more than day one</small></span><span class="badge">locked · next trip</span></div>
+      <div class="body">
+        <svg class="art" viewBox="556 112 148 148" aria-hidden="true" focusable="false"><use href="#bld-d4"/></svg>
+        <div class="txt">
+          <p>Your first real workout in a while, from the inside: what tears, what rebuilds, and why the soreness shows up late.</p>
+          <p class="muted">Tool on the way: the <b>muscle clock</b>. When it'll hurt most, when it stops, and when to go again.</p>
+        </div>
+      </div>
+    </article>
   </section>
 
   <section class="row" style="justify-content:center">
@@ -278,11 +297,30 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
   </footer>
 </main>
 
+<script src="districts.js"></script>
 <script>
-// Tapping a district on the map opens its card; the browser's own anchor jump does the scrolling (smooth unless reduced motion).
-document.querySelectorAll('.city a[href^="#"]').forEach(a => a.addEventListener('click', () => {
-  const d = document.getElementById(a.getAttribute('href').slice(1));
-  if (d) d.open = true;
-}));
+// Applies districts.js to the map and the cards. Open = state 'open', or its opens time has passed.
+// ?preview=open / ?preview=locked shows either look (display only; nothing is saved).
+(function(){
+  const list=window.RHINO_DISTRICTS||[];
+  const pv=new URLSearchParams(location.search).get('preview');
+  const now=Date.now();
+  const day=iso=>new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'America/Chicago'});
+  let anyOpen=false, next=null;
+  list.forEach(d=>{
+    let open=d.state==='open'||(!!d.opens&&now>=Date.parse(d.opens));
+    if(pv==='open'&&d.opens) open=true;
+    if(pv==='locked') open=false;
+    const card=document.getElementById(d.id), pin=document.querySelector('.dist[data-d="'+d.id+'"]'), art=document.getElementById('bld-'+d.id);
+    [card,pin].forEach(el=>{if(el){el.classList.toggle('is-open',open);el.classList.toggle('is-locked',!open);}});
+    if(art){if(open)art.removeAttribute('filter');else art.setAttribute('filter','url(#sil)');}
+    if(pin) pin.setAttribute('aria-label','District '+d.id.slice(1)+', '+d.name+': '+(open?'open':'locked, next trip'));
+    const badge=card&&card.querySelector('.badge'); if(badge) badge.textContent=open?'open':'locked · next trip';
+    const when=card&&card.querySelector('[data-when]'); if(when&&d.opens) when.textContent='Opens '+day(d.opens);
+    if(open) anyOpen=true; else if(d.opens&&(!next||Date.parse(d.opens)<Date.parse(next))) next=d.opens;
+  });
+  const hint=document.getElementById('hint');
+  if(hint) hint.textContent=anyOpen?'start here ↓':(next?'first trips open '+day(next):'next trips coming');
+})();
 </script>
 </html>
