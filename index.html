@@ -83,6 +83,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
 .d.is-locked .art{background:var(--navy)}
 .d.is-locked .muted{color:#AEB4C6}
 .d.is-locked .s-open,.d.is-open .s-locked{display:none}
+/* a locked district whose tools are already live keeps its calculator + notes buttons (toolsLive in districts.js) */
+.d.is-locked:not(.tools-live) .acts{display:none}
+.d.is-locked .acts .btn.ghost{background:transparent;color:#fff;border-color:#DCE3FA;box-shadow:none}
 .d.is-open{background:var(--card);border:3px solid var(--ink);box-shadow:0 0 0 4px var(--yellow),0 0 34px 6px rgba(255,214,10,.42)}
 .d.is-open .dh{background:var(--cobalt);color:#fff}
 .d.is-open .art{background:radial-gradient(circle at 50% 58%,rgba(255,214,10,.6),rgba(255,214,10,0) 68%),var(--navy)}
@@ -227,7 +230,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
   </section>
 
   <section class="districts" aria-label="Districts">
-    <article class="d is-locked" id="d1">
+    <article class="d is-locked tools-live" id="d1">
       <div class="dh"><span class="ring">1</span><span><b>the energy drink</b><small>stomach · brain · heart · sleep · who profits</small></span><span class="badge">locked · next trip</span></div>
       <div class="body">
         <svg class="art" viewBox="28 80 172 176" aria-hidden="true" focusable="false"><use href="#bld-d1"/></svg>
@@ -236,14 +239,14 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
           <span class="when s-locked" data-when>Opens Nov 20</span>
           <p class="s-open">Two things from the trip, free, no sign-up:</p>
         </div>
-        <div class="acts s-open">
+        <div class="acts">
           <div class="row"><a class="btn" href="clock/">Open calculator</a><a class="btn ghost" href="notes/">Read Rhino's notes</a></div>
-          <div class="row"><a class="tlink" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a><span class="note">the whole tour, start to finish.</span></div>
+          <div class="row s-open"><a class="tlink" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a><span class="note">the whole tour, start to finish.</span></div>
         </div>
       </div>
     </article>
 
-    <article class="d is-locked" id="d2">
+    <article class="d is-locked tools-live" id="d2">
       <div class="dh"><span class="ring">2</span><span><b>the all-nighter</b><small>what staying up actually does to your brain</small></span><span class="badge">locked · next trip</span></div>
       <div class="body">
         <svg class="art" viewBox="225 82 140 174" aria-hidden="true" focusable="false"><use href="#bld-d2"/></svg>
@@ -252,9 +255,9 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
           <span class="when s-locked" data-when>Opens Nov 20</span>
           <p class="s-open">Two things from the trip, free, no sign-up:</p>
         </div>
-        <div class="acts s-open">
+        <div class="acts">
           <div class="row"><a class="btn" href="sleep/">Open calculator</a><a class="btn ghost" href="notes/all-nighter/">Read Rhino's notes</a></div>
-          <div class="row"><a class="tlink" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a></div>
+          <div class="row s-open"><a class="tlink" href="https://www.youtube.com/@heyrhinotv">watch the full trip on YouTube</a></div>
         </div>
       </div>
     </article>
@@ -313,6 +316,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var
     if(pv==='locked') open=false;
     const card=document.getElementById(d.id), pin=document.querySelector('.dist[data-d="'+d.id+'"]'), art=document.getElementById('bld-'+d.id);
     [card,pin].forEach(el=>{if(el){el.classList.toggle('is-open',open);el.classList.toggle('is-locked',!open);}});
+    if(card) card.classList.toggle('tools-live',!!d.toolsLive);
     if(art){if(open)art.removeAttribute('filter');else art.setAttribute('filter','url(#sil)');}
     if(pin) pin.setAttribute('aria-label','District '+d.id.slice(1)+', '+d.name+': '+(open?'open':'locked, next trip'));
     const badge=card&&card.querySelector('.badge'); if(badge) badge.textContent=open?'open':'locked · next trip';
